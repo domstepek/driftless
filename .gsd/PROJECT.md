@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-Empty repo. Git initialized, GitHub remote at domstepek/driftless (public). No code yet.
+M001/S01 complete. pnpm monorepo with two library packages (`packages/cli`, `packages/core`) and Vite+ v0.1.11 toolchain operational. CLI prints `driftless v0.0.0`, core exports S02 boundary types (DriftlessConfig, InitOptions, DocFramework). Build, format/lint, and 5 smoke tests all pass. Next: S02 (Interactive CLI wizard).
 
 ## Architecture / Key Patterns
 

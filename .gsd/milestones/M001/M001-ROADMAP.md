@@ -51,16 +51,20 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: Monorepo scaffold + Vite+ toolchain** `risk:medium` `depends:[]`
+- [x] **S01: Monorepo scaffold + Vite+ toolchain** `risk:medium` `depends:[]`
+
   > After this: `vp build`, `vp check`, `vp test` all pass on the project skeleton. CLI package has a working entry point that prints `driftless v0.0.0`. The monorepo structure is real and exercised — not just files on disk.
 
 - [ ] **S02: Interactive CLI wizard** `risk:medium` `depends:[S01]`
+
   > After this: `npx driftless init` runs an interactive wizard — detects test framework config, prompts for paths/framework/capabilities, writes `.driftless.json`. No doc generation yet, but the full prompt flow works end-to-end.
 
 - [ ] **S03: Agent-driven doc generation** `risk:high` `depends:[S02]`
+
   > After this: The CLI spawns Claude Code in headless mode, passes e2e test files, and receives generated markdown docs in the correct framework format. Progress spinner shows file-by-file status. This proves the core thesis.
 
 - [ ] **S04: Skill installer + capability selection** `risk:medium` `depends:[S02,S03]`
+
   > After this: CLI copies genericized skill files into the target repo's `.skills/` directory, configured for the user's doc framework and capability choices. Skills are correctly parameterized and ready for the GitHub Action (M002).
 
 - [ ] **S05: Rollback, debug logging, dry-run** `risk:low` `depends:[S02,S03,S04]`
@@ -71,60 +75,72 @@ This milestone is complete only when all are true:
 ### S01 → S02
 
 Produces:
+
 - `packages/cli/src/index.ts` — CLI entry point with command routing (exports: `main()`)
 - `packages/core/src/index.ts` — shared types and utilities (exports: `DriftlessConfig`, `InitOptions`, `DocFramework`)
 - `packages/cli/package.json` — `bin.driftless` pointing to built CLI
 - Working Vite+ toolchain: `vp build`, `vp check`, `vp test` all functional
 
 Consumes:
+
 - nothing (first slice)
 
 ### S02 → S03
 
 Produces:
+
 - `packages/cli/src/commands/init.ts` — init command orchestrator (exports: `initCommand()`)
 - `packages/cli/src/prompts/` — prompt modules using @clack/prompts (exports: `gatherConfig()`)
 - `packages/core/src/config.ts` — config read/write for `.driftless.json` (exports: `readConfig()`, `writeConfig()`, `detectTestFramework()`)
 - `packages/core/src/types.ts` — full config schema (exports: `DriftlessConfig`, `DocFramework`, `Capability`)
 
 Consumes from S01:
+
 - CLI entry point and command routing
 - Core package types
 
 ### S02 → S04
 
 Produces:
+
 - Same as S02 → S03 (config + types are shared)
 
 Consumes from S01:
+
 - CLI entry point and command routing
 
 ### S03 → S04
 
 Produces:
+
 - `packages/core/src/agent.ts` — Claude Code headless spawner (exports: `spawnAgent()`, `AgentResult`)
 - `packages/core/src/generator.ts` — doc generation orchestrator (exports: `generateDocs()`)
 - `packages/core/src/adapters/` — framework-specific formatters (exports: `PlainMdAdapter`, `FumadocsAdapter`, `DocusaurusAdapter`)
 
 Consumes from S02:
+
 - Config schema and reader
 - Init command orchestrator (generation is called from init flow)
 
 ### S03 → S05
 
 Produces:
+
 - Agent spawning and doc generation logic (same as S03 → S04)
 
 Consumes from S02:
+
 - Config and init flow
 
 ### S04 → S05
 
 Produces:
+
 - `packages/core/src/skills/` — skill template files and installer (exports: `installSkills()`)
 - `packages/core/src/skills/templates/` — genericized skill templates for doc-generator and e2e-writer
 
 Consumes from S02:
+
 - Config (capability choices, skill install path)
-Consumes from S03:
+  Consumes from S03:
 - Adapter selection (skill templates reference the same framework adapters)

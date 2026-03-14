@@ -1,0 +1,5 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/oxlint/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["typescript"],
+  "rules": {}
+}

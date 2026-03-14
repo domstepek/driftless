@@ -9,7 +9,7 @@ M002 builds the distributable GitHub Actions that driftless installs into user r
 
 ## Why This Milestone
 
-M001 gives users generated docs from a one-time `init` run. M002 makes those docs *stay current* — the "can't drift" promise. Without PR-triggered automation, docs rot as the codebase evolves.
+M001 gives users generated docs from a one-time `init` run. M002 makes those docs _stay current_ — the "can't drift" promise. Without PR-triggered automation, docs rot as the codebase evolves.
 
 ## User-Visible Outcome
 

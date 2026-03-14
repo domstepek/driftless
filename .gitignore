@@ -7,6 +7,7 @@
 .gsd/metrics.json
 .gsd/completed-units.json
 .gsd/STATE.md
+.bg-shell/
 .DS_Store
 Thumbs.db
 *.swp
@@ -21,6 +22,7 @@ Thumbs.db
 node_modules/
 .next/
 dist/
+dist-ssr/
 build/
 __pycache__/
 *.pyc
@@ -32,3 +34,4 @@ vendor/
 coverage/
 .cache/
 tmp/
+*.local
