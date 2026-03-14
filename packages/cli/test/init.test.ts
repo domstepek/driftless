@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, stat, writeFile as fsWriteFile, mkdir } from "no
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import type { DriftlessConfig, GenerateResult, InitOptions } from "@driftless/core";
+import type { DriftlessConfig, GenerateResult, InitOptions } from "@driftless-ai/core";
 
 // Mock @clack/prompts
 const mockSpinner = {
@@ -30,9 +30,9 @@ vi.mock("@clack/prompts", () => ({
   cancel: vi.fn(),
 }));
 
-// Mock @driftless/core — spread actual to keep FileTransaction, DebugLogger, configPath real
-vi.mock("@driftless/core", async () => {
-  const actual = await vi.importActual<typeof import("@driftless/core")>("@driftless/core");
+// Mock @driftless-ai/core — spread actual to keep FileTransaction, DebugLogger, configPath real
+vi.mock("@driftless-ai/core", async () => {
+  const actual = await vi.importActual<typeof import("@driftless-ai/core")>("@driftless-ai/core");
   return {
     ...actual,
     detectTestFramework: vi.fn(),
@@ -58,7 +58,7 @@ vi.mock("@driftless/core", async () => {
 });
 
 import * as p from "@clack/prompts";
-import { detectTestFramework, configExists, generateDocs, installSkills, installWorkflows } from "@driftless/core";
+import { detectTestFramework, configExists, generateDocs, installSkills, installWorkflows } from "@driftless-ai/core";
 import { gatherConfig } from "../src/prompts/init-prompts.js";
 import { initCommand } from "../src/commands/init.js";
 

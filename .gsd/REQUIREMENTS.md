@@ -198,26 +198,26 @@ Guidelines:
 ### R016 — npm package with semantic versioning
 
 - Class: launchability
-- Status: active
+- Status: validated
 - Description: driftless is published to npm with proper semantic versioning, `bin` field for CLI, and `files` field for minimal package size
-- Why it matters: Users install via `npx driftless init` — it must be on npm
+- Why it matters: Users install via `npx @driftless-ai/cli init` — it must be on npm
 - Source: user
 - Primary owning slice: M003/S01
 - Supporting slices: none
-- Validation: unmapped
-- Notes: none
+- Validation: M003/S01 — both @driftless-ai/core@1.0.0 and @driftless-ai/cli@1.0.0 published to npm. `npm install -g @driftless-ai/cli && driftless --version` returns v1.0.0. Correct bin, files, exports, publishConfig fields verified via tarball inspection.
+- Notes: Scope is @driftless-ai (not @driftless — org unavailable)
 
 ### R017 — CHANGELOG.md with conventional commits
 
 - Class: launchability
-- Status: active
+- Status: validated
 - Description: Automated CHANGELOG generation from conventional commit messages
 - Why it matters: Users and contributors need to see what changed between versions
 - Source: user
 - Primary owning slice: M003/S01
 - Supporting slices: none
-- Validation: unmapped
-- Notes: none
+- Validation: M003/S01 — CHANGELOG.md at repo root with v1.0.0 entry summarizing M001+M002 features. Hand-written for v1.0.0 (D044); automated generation from conventional commits deferred to S02 CI pipeline.
+- Notes: v1.0.0 is hand-written narrative; future releases will use tooling
 
 ### R018 — CI/CD pipeline for driftless repo
 
@@ -458,8 +458,8 @@ Guidelines:
 | R013 | core-capability    | validated    | M002/S02      | none               | M002/S02 |
 | R014 | integration        | validated    | M002/S01      | M002/S02           | M002/S01 |
 | R015 | primary-user-loop  | validated    | M001/S04      | M001/S02           | M001/S04 |
-| R016 | launchability      | active       | M003/S01      | none               | unmapped |
-| R017 | launchability      | active       | M003/S01      | none               | unmapped |
+| R016 | launchability      | validated    | M003/S01      | none               | M003/S01 |
+| R017 | launchability      | validated    | M003/S01      | none               | M003/S01 |
 | R018 | operability        | active       | M003/S02      | none               | unmapped |
 | R019 | launchability      | active       | M003/S03      | none               | unmapped |
 | R020 | launchability      | active       | M003/S03      | none               | unmapped |
@@ -481,7 +481,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 10
-- Mapped to slices: 10
-- Validated: 18
+- Active requirements: 8
+- Mapped to slices: 8
+- Validated: 20
 - Unmapped active requirements: 0

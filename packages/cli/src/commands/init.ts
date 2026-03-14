@@ -12,14 +12,14 @@ import {
   installWorkflows,
   outputFilename,
   resolveGlobs,
-} from "@driftless/core";
+} from "@driftless-ai/core";
 import type {
   GenerateResult,
   InitOptions,
   InstallSkillsResult,
   InstallWorkflowsResult,
   ProgressEvent,
-} from "@driftless/core";
+} from "@driftless-ai/core";
 import { gatherConfig } from "../prompts/init-prompts.js";
 
 /**

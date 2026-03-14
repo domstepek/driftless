@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import type { Capability, DriftlessConfig, DocFramework, TestFramework } from "@driftless/core";
+import type { Capability, DriftlessConfig, DocFramework, TestFramework } from "@driftless-ai/core";
 
 /**
  * Default test glob per detected framework.

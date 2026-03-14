@@ -56,7 +56,7 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: npm Package Publishing + v1.0.0 Release** `risk:high` `depends:[]`
+- [x] **S01: npm Package Publishing + v1.0.0 Release** `risk:high` `depends:[]`
   > After this: `npm install -g @driftless/cli && driftless --version` returns 1.0.0, installed from the live npm registry. CHANGELOG.md summarizes all M001+M002 work. Both `@driftless/core` and `@driftless/cli` are live on npmjs.com.
 - [ ] **S02: CI/CD Pipeline + Automated Releases** `risk:medium` `depends:[S01]`
   > After this: pushing a `v1.0.1` tag to main triggers GitHub Actions that runs tests, publishes both packages to npm with provenance, and creates a GitHub Release with changelog body. PRs run test+lint+build and block merge on failure.
