@@ -8,4 +8,4 @@
 | 2 | 2026-03-14 | M006 | Pro Tier — Knowledge Base + Agent Skill (feature a) |
 | 3 | 2026-03-14 | M007 | Pro Tier — AI-Generated Guided Walkthroughs (feature b) |
 | 4 | 2026-03-14 | M008 | Pro Tier — Automated Demo/Tutorial Videos (feature c) |
-| 5 | 2026-03-14 | M009 | Pro Tier — Autonomous Feature Request → Development Pipeline (feature d) |
+| 5 | 2026-03-14 | M009 | Pro Tier — Signal-Driven Autonomous Development Pipeline (feature d) — analytics + error tracking + behavioral patterns + user requests → auto-ticket → auto-develop → verify |

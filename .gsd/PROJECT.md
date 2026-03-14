@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-M001/S05 complete — all five slices done. Init is now fail-safe: FileTransaction wraps all write operations with automatic rollback on error, DebugLogger writes structured `.driftless/debug.log` every run, `--dry-run` previews all changes without spawning the agent. 146 tests pass across 11 test files. M001 milestone ready for audit.
+M001 complete. The CLI (`npx driftless init`) runs an interactive wizard that auto-detects test frameworks, prompts for configuration, spawns Claude Code in headless mode to generate training docs from e2e tests, installs parameterized skill files, and writes `.driftless.json` config. Three doc framework adapters (plain-md, fumadocs MDX, docusaurus MDX). Fail-safe init with FileTransaction rollback, structured debug logging, and `--dry-run` preview. 146 tests across 11 files, both packages build clean. 15 of 17 M001 requirements validated. Next: M002 (GitHub Actions + PR Automation).
 
 ## Architecture / Key Patterns
 
@@ -38,7 +38,7 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 - [ ] M006: Pro Tier — Knowledge Base + Agent Skill (feature a) — auto-upload training materials to managed KB, agent skill for chatbot/agent integration
 - [ ] M007: Pro Tier — AI-Generated Guided Walkthroughs (feature b) — dynamic in-app walkthroughs generated from training docs
 - [ ] M008: Pro Tier — Automated Demo/Tutorial Videos (feature c) — programmatic video generation from training docs via Replit Animation or similar
-- [ ] M009: Pro Tier — Autonomous Feature Request → Development Pipeline (feature d) — widget detects unmet needs, clusters requests, auto-tickets, cloud agent develops, auto-PR, auto-docs, preview link
+- [ ] M009: Pro Tier — Signal-Driven Autonomous Development Pipeline (feature d) — analytics/error tracking/behavioral signals + explicit requests → AI prioritization → auto-ticket → cloud agent develops → auto-PR → auto-docs/tests → preview + walkthrough → verify via signals
 
 ## Notes
 

@@ -35,7 +35,7 @@ driftless evolves from a free CLI that generates docs from e2e tests into a **pr
 **Feature (a): Knowledge Base + Agent Skill** — Auto-upload training materials to managed KB + agent skill for chatbot/agent integration
 **Feature (b): AI-Generated Guided Walkthroughs** — Dynamic in-app walkthroughs generated from training docs (vs manual Pendo/WalkMe authoring)
 **Feature (c): Automated Product Demo/Tutorial Videos** — Programmatic video generation from training docs via Replit Animation or similar
-**Feature (d): Autonomous Feature Request → Development Pipeline** — Widget detects unmet user needs → collects requests → demand analysis → auto-ticket → cloud agent develops → auto-PR → auto-docs/tests → preview link → guided walkthrough. Phase 3 moonshot.
+**Feature (d): Signal-Driven Autonomous Development Pipeline** — Ingests analytics (Umami/Mixpanel/Amplitude), error tracking (Sentry/Datadog), behavioral patterns, explicit user requests, and automatic bug discovery into a unified signal DB. AI prioritizes, auto-creates tickets, assigns to cloud coding agents, auto-PRs with docs/tests, generates preview links + guided walkthroughs, then verifies the fix via the same signals. Phase 3 moonshot.
 
 ## ICP — Ideal Customer Profile
 
