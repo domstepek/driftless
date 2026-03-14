@@ -37,6 +37,7 @@ vi.mock("@driftless/core", async () => {
     ...actual,
     detectTestFramework: vi.fn(),
     configExists: vi.fn().mockResolvedValue(false),
+    getWorkflowFilenames: actual.getWorkflowFilenames,
     generateDocs: vi.fn().mockResolvedValue({
       filesGenerated: 2,
       filesErrored: 0,
@@ -652,10 +653,10 @@ describe("initCommand", () => {
       );
     });
 
-    it("does not show workflow paths in dry-run when doc-generator not in capabilities", async () => {
+    it("does not show workflow paths in dry-run when no capabilities have workflows", async () => {
       mockGroup.mockResolvedValue({
         ...defaultGroupResult,
-        capabilities: ["e2e-writer"] as const,
+        capabilities: [] as unknown as readonly ["doc-generator", "e2e-writer"],
       });
 
       await initCommand(makeOptions({ dryRun: true }));
@@ -665,6 +666,38 @@ describe("initCommand", () => {
       expect(infoCalls.every((msg) => !msg.includes("Workflows that would be scaffolded"))).toBe(
         true,
       );
+    });
+
+    it("shows test-gen workflow in dry-run when e2e-writer is the only capability", async () => {
+      mockGroup.mockResolvedValue({
+        ...defaultGroupResult,
+        capabilities: ["e2e-writer"] as const,
+      });
+
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.log.info).toHaveBeenCalledWith(
+        expect.stringContaining("Workflows that would be scaffolded"),
+      );
+      expect(p.log.message).toHaveBeenCalledWith(
+        expect.stringContaining("driftless-test-gen.yml"),
+      );
+    });
+
+    it("shows both workflows in dry-run when both capabilities are selected", async () => {
+      mockGroup.mockResolvedValue({
+        ...defaultGroupResult,
+        capabilities: ["doc-generator", "e2e-writer"] as const,
+      });
+
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.log.info).toHaveBeenCalledWith(
+        expect.stringContaining("Workflows that would be scaffolded"),
+      );
+      const messageCalls = vi.mocked(p.log.message).mock.calls.map((c) => c[0]);
+      expect(messageCalls.some((msg) => msg.includes("driftless-doc-update.yml"))).toBe(true);
+      expect(messageCalls.some((msg) => msg.includes("driftless-test-gen.yml"))).toBe(true);
     });
 
     it("registers workflow files with transaction for rollback", async () => {

@@ -35,7 +35,7 @@ export {
   type InstallSkillsResult,
 } from "./skills.js";
 
-export { docUpdateWorkflowTemplate } from "./workflows.js";
+export { docUpdateWorkflowTemplate, getWorkflowFilenames, testGenWorkflowTemplate, WORKFLOW_TEMPLATES } from "./workflows.js";
 
 export {
   installWorkflows,

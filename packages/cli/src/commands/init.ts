@@ -7,6 +7,7 @@ import {
   detectTestFramework,
   FileTransaction,
   generateDocs,
+  getWorkflowFilenames,
   installSkills,
   installWorkflows,
   outputFilename,
@@ -111,9 +112,9 @@ export async function initCommand(options: InitOptions): Promise<void> {
     }
 
     // Compute workflow file paths
-    const workflowPaths = config.capabilities
-      .filter((cap) => cap === "doc-generator")
-      .map(() => join(".github", "workflows", "driftless-doc-update.yml"));
+    const workflowPaths = getWorkflowFilenames(config.capabilities).map((f) =>
+      join(".github", "workflows", f),
+    );
 
     if (workflowPaths.length > 0) {
       p.log.info(`Workflows that would be scaffolded (${workflowPaths.length}):`);

@@ -162,13 +162,13 @@ Guidelines:
 ### R013 — GitHub Action: PR-triggered e2e test generation
 
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: A distributable GitHub Action that detects new/changed flows in a PR and generates missing e2e tests via claude-code-action, committing them to the PR
 - Why it matters: Closes the loop — not just docs from tests, but tests themselves stay current
 - Source: user
 - Primary owning slice: M002/S02
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M002/S02 — `testGenWorkflowTemplate(config)` produces valid GitHub Actions YAML with pull_request trigger, permissions, PR-branch checkout, fork detection, API key check, bot-loop prevention, and claude-code-action@v1 step with e2e-writer prompt. Init scaffolds the workflow for e2e-writer capability with full capability matrix proven. 35 template tests + capability matrix init tests verify structure, content, and scaffolding. Live test-generation accuracy is milestone-level UAT.
 - Notes: Independent from doc updater — user can install one or both
 
 ### R014 — GitHub Action uses claude-code-action
@@ -455,7 +455,7 @@ Guidelines:
 | R010 | quality-attribute  | validated    | M001/S02      | none               | M001/S02 |
 | R011 | quality-attribute  | validated    | M001/S05      | none               | M001/S05 |
 | R012 | core-capability    | validated    | M002/S01      | M002/S02           | M002/S01 |
-| R013 | core-capability    | active       | M002/S02      | none               | unmapped |
+| R013 | core-capability    | validated    | M002/S02      | none               | M002/S02 |
 | R014 | integration        | validated    | M002/S01      | M002/S02           | M002/S01 |
 | R015 | primary-user-loop  | validated    | M001/S04      | M001/S02           | M001/S04 |
 | R016 | launchability      | active       | M003/S01      | none               | unmapped |
@@ -481,7 +481,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 17
-- Mapped to slices: 17
-- Validated: 17
+- Active requirements: 10
+- Mapped to slices: 10
+- Validated: 18
 - Unmapped active requirements: 0

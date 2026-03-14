@@ -217,11 +217,136 @@ ${checkoutStep()}
 }
 
 // ---------------------------------------------------------------------------
+// Test-generation prompt
+// ---------------------------------------------------------------------------
+
+/**
+ * Builds the test-generation prompt that instructs Claude to read the PR diff,
+ * identify genuinely new user-facing flows (vs modifications to existing flows),
+ * and generate missing e2e tests using the installed e2e-writer skill.
+ */
+function testGenPrompt(config: DriftlessConfig): string {
+  const testPathsList = config.testPaths.map((p) => `\`${p}\``).join(", ");
+
+  return `|
+            You are an e2e test generation agent for a project managed by driftless.
+
+            ## Context
+
+            This project's configuration is in \`.driftless.json\` at the repo root.
+            - Test file patterns: ${testPathsList}
+            - Documentation output directory: \`${config.outputDir}/\`
+            - Skill definitions directory: \`${config.skillsDir}/\`
+
+            ## Your Task
+
+            1. **Read the PR diff** — run \`git diff HEAD~1\` to see what changed in this pull request.
+
+            2. **Identify genuinely new user-facing flows** — from the diff, determine which changes introduce NEW workflows that lack e2e test coverage. Focus on:
+               - New routes or pages (new file in routes/pages directory, new route registration)
+               - New API endpoints that have UI consumers (new handler + new fetch/form)
+               - New form workflows (new form component with submission logic)
+               - New multi-step user journeys (new wizard, onboarding, checkout)
+
+            3. **Distinguish new flows from modifications** — do NOT generate tests for:
+               - Bug fixes to existing flows (these should already have tests)
+               - Refactors that don't change user-visible behavior
+               - Style/UI tweaks to existing components
+               - Internal API changes with no new user-facing surface
+               - Configuration changes that don't add new workflows
+
+               **Heuristics for detection:**
+               - New route/page file = likely a new flow → suggest tests
+               - New API endpoint with corresponding UI component = likely a new flow → suggest tests
+               - Modified existing route handler = likely NOT a new flow → skip
+               - Renamed/moved files without new exports = likely NOT a new flow → skip
+               - New utility/helper with no direct user-facing path = NOT a new flow → skip
+
+               **When in doubt, err toward suggesting tests.** False positives (unnecessary test suggestions) are less harmful than false negatives (missing test coverage for new flows).
+
+            4. **Generate missing e2e tests** — for each new flow identified:
+               - Read the e2e-writer skill at \`${config.skillsDir}/e2e-writer/SKILL.md\` for test conventions, naming, and structure
+               - Read the relevant source files to understand the complete flow
+               - Generate a new e2e test file in the appropriate test directory matching: ${testPathsList}
+               - Follow the conventions in the skill file exactly (framework, selectors, assertions)
+               - Each test file should cover the happy path and at least one error/edge case
+
+            5. **Post a summary** — after generating tests, leave a PR comment summarizing:
+               - Which new flows were detected and what test files were created
+               - Which changes in the PR were determined to be modifications (not new flows) and why
+               - Any flows where test generation was skipped due to ambiguity (flagged for manual review)
+
+            ## Rules
+
+            - Only generate tests for genuinely NEW user-facing flows introduced in THIS PR
+            - Do not generate tests for existing flows that already have coverage
+            - Follow the writing style and framework conventions in the e2e-writer skill file exactly
+            - If no new flows are detected, post a comment confirming no new e2e tests are needed`;
+}
+
+// ---------------------------------------------------------------------------
+// Test-generation workflow template
+// ---------------------------------------------------------------------------
+
+/**
+ * Produces a complete GitHub Actions workflow YAML string for the
+ * driftless test-generation workflow. The workflow triggers on pull requests,
+ * uses claude-code-action@v1 to detect new user flows and generate missing
+ * e2e tests using the installed e2e-writer skill.
+ *
+ * @throws {Error} If required config fields are missing or empty
+ */
+export function testGenWorkflowTemplate(config: DriftlessConfig): string {
+  if (!config.outputDir) {
+    throw new Error(
+      "testGenWorkflowTemplate: config.outputDir is required but was empty or missing",
+    );
+  }
+  if (!config.skillsDir) {
+    throw new Error(
+      "testGenWorkflowTemplate: config.skillsDir is required but was empty or missing",
+    );
+  }
+  if (!config.testPaths || config.testPaths.length === 0) {
+    throw new Error(
+      "testGenWorkflowTemplate: config.testPaths is required but was empty or missing",
+    );
+  }
+
+  const prompt = testGenPrompt(config);
+
+  return `name: Driftless Test Generation
+on:
+  pull_request:
+
+jobs:
+  generate-tests:
+${botLoopCondition()}
+    runs-on: ubuntu-latest
+${permissionsBlock()}
+    steps:
+${forkDetectionStep()}
+
+${apiKeyCheckStep()}
+
+${checkoutStep()}
+
+      - name: Generate e2e tests for new flows
+        if: github.event.pull_request.head.repo.fork != true
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: ${prompt}
+          claude_args: "--allowedTools bash,read,write,edit"
+`;
+}
+
+// ---------------------------------------------------------------------------
 // Capability → workflow filename mapping
 // ---------------------------------------------------------------------------
 
 /** Map from capability name to the workflow filename it produces. */
-const WORKFLOW_TEMPLATES: Record<
+export const WORKFLOW_TEMPLATES: Record<
   string,
   { filename: string; template: (config: DriftlessConfig) => string }
 > = {
@@ -229,7 +354,21 @@ const WORKFLOW_TEMPLATES: Record<
     filename: "driftless-doc-update.yml",
     template: docUpdateWorkflowTemplate,
   },
+  "e2e-writer": {
+    filename: "driftless-test-gen.yml",
+    template: testGenWorkflowTemplate,
+  },
 };
+
+/**
+ * Returns the workflow filenames for a given set of capabilities.
+ * Used by init dry-run preview to show which files would be scaffolded.
+ */
+export function getWorkflowFilenames(capabilities: string[]): string[] {
+  return capabilities
+    .filter((cap) => cap in WORKFLOW_TEMPLATES)
+    .map((cap) => WORKFLOW_TEMPLATES[cap].filename);
+}
 
 // ---------------------------------------------------------------------------
 // Workflow installer

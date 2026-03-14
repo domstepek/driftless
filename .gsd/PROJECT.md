@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-M001 complete. M002 S01 complete. The CLI (`npx driftless init`) runs an interactive wizard that auto-detects test frameworks, prompts for configuration, spawns Claude Code in headless mode to generate training docs from e2e tests, installs parameterized skill files, scaffolds GitHub Actions workflow files based on selected capabilities, and writes `.driftless.json` config. Three doc framework adapters (plain-md, fumadocs MDX, docusaurus MDX). Fail-safe init with FileTransaction rollback, structured debug logging, and `--dry-run` preview. The doc-update workflow template (`driftless-doc-update.yml`) produces valid GitHub Actions YAML with PR-triggered staleness detection via `claude-code-action@v1`, operational edge handling (fork PRs, missing API key, bot loop prevention), and config parameterization. 185 tests across 12 files, both packages build clean. 17 of 17 active requirements validated. Next: M002/S02 (test-generation workflow template).
+M001 complete. M002 complete. The CLI (`npx driftless init`) runs an interactive wizard that auto-detects test frameworks, prompts for configuration, spawns Claude Code in headless mode to generate training docs from e2e tests, installs parameterized skill files, scaffolds GitHub Actions workflow files based on selected capabilities, and writes `.driftless.json` config. Three doc framework adapters (plain-md, fumadocs MDX, docusaurus MDX). Fail-safe init with FileTransaction rollback, structured debug logging, and `--dry-run` preview. Two workflow templates: `driftless-doc-update.yml` for PR-triggered staleness detection and `driftless-test-gen.yml` for PR-triggered e2e test generation — both via `claude-code-action@v1` with operational edge handling (fork PRs, missing API key, bot loop prevention). Full capability matrix: doc-only, test-only, both, or neither. 222 tests across 12 files, both packages build clean. 18 of 28 active+validated requirements validated. Next: M003 (OSS Maturity + v1.0 Release).
 
 ## Architecture / Key Patterns
 
@@ -31,7 +31,7 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 ## Milestone Sequence
 
 - [x] M001: Core CLI + E2E-to-Docs Engine — Setup wizard, agent-driven doc generation from any e2e tests, skill installer
-- [ ] M002: GitHub Actions + PR Automation — Distributable actions for doc staleness detection, doc updates, and e2e test generation in user repos
+- [ ] M002: GitHub Actions + PR Automation
 - [ ] M003: OSS Maturity + v1.0 Release — npm publish pipeline, semantic releases, CHANGELOG, CI for driftless, community files, repo hygiene
 - [ ] M004: Product Launch — Vercel landing page, fumadocs docs site, X/Twitter OSS launch playbook (output to ~/Desktop/driftless/)
 - [ ] M005: Business Infrastructure + Platform Vision — Driftless LLC (NY), business planning docs (vision/exec summary/PRD/pricing/GTM/pitch deck outline), payment infra setup, private Pro repo scaffold (output to ~/Desktop/driftless/)

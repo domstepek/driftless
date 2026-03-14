@@ -51,7 +51,7 @@ This milestone is complete only when all are true:
 
 - [x] **S01: Doc-update workflow template + init scaffolding** `risk:high` `depends:[]`
   > After this: `driftless init` with doc-generator capability scaffolds `.github/workflows/driftless-doc-update.yml` containing a valid workflow with correct permissions, PR-branch checkout, staleness detection prompt via claude-code-action, and operational edge handling — proven by unit tests on template output and init integration tests.
-- [ ] **S02: Test-generation workflow template** `risk:low` `depends:[S01]`
+- [x] **S02: Test-generation workflow template** `risk:low` `depends:[S01]`
   > After this: `driftless init` with e2e-writer capability scaffolds `.github/workflows/driftless-test-gen.yml` alongside the doc-update workflow when both capabilities are selected — proven by unit tests on template output and init integration tests.
 
 ## Boundary Map
