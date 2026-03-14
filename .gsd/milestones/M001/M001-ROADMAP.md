@@ -63,7 +63,7 @@ This milestone is complete only when all are true:
 
   > After this: The CLI spawns Claude Code in headless mode, passes e2e test files, and receives generated markdown docs in the correct framework format. Progress spinner shows file-by-file status. This proves the core thesis.
 
-- [ ] **S04: Skill installer + capability selection** `risk:medium` `depends:[S02,S03]`
+- [x] **S04: Skill installer + capability selection** `risk:medium` `depends:[S02,S03]`
 
   > After this: CLI copies genericized skill files into the target repo's `.skills/` directory, configured for the user's doc framework and capability choices. Skills are correctly parameterized and ready for the GitHub Action (M002).
 

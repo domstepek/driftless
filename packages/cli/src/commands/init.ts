@@ -1,6 +1,17 @@
 import * as p from "@clack/prompts";
-import { configExists, detectTestFramework, generateDocs, writeConfig } from "@driftless/core";
-import type { GenerateResult, InitOptions, ProgressEvent } from "@driftless/core";
+import {
+  configExists,
+  detectTestFramework,
+  generateDocs,
+  installSkills,
+  writeConfig,
+} from "@driftless/core";
+import type {
+  GenerateResult,
+  InitOptions,
+  InstallSkillsResult,
+  ProgressEvent,
+} from "@driftless/core";
 import { gatherConfig } from "../prompts/init-prompts.js";
 
 /**
@@ -87,6 +98,21 @@ export async function initCommand(options: InitOptions): Promise<void> {
     }
   }
 
+  // Install skill files for selected capabilities
+  let skillsResult: InstallSkillsResult | undefined;
+  if (config.capabilities.length > 0) {
+    if (options.dryRun) {
+      p.log.info("Dry run — skills would be installed but were skipped.");
+    } else {
+      skillsResult = await installSkills(config, { cwd: options.cwd });
+      if (skillsResult.installed.length > 0) {
+        p.log.info(
+          `Installed ${skillsResult.installed.length} skill${skillsResult.installed.length === 1 ? "" : "s"}: ${skillsResult.installed.join(", ")}`,
+        );
+      }
+    }
+  }
+
   // Summary
   const lines = [
     `Test paths:     ${config.testPaths.join(", ")}`,
@@ -107,6 +133,12 @@ export async function initCommand(options: InitOptions): Promise<void> {
     if (genResult.totalCostUsd > 0) {
       lines.push(`Total cost:     $${genResult.totalCostUsd.toFixed(4)}`);
     }
+  }
+
+  // Append skills install info
+  if (skillsResult && skillsResult.installed.length > 0) {
+    lines.push("");
+    lines.push(`Skills installed: ${skillsResult.installed.join(", ")}`);
   }
 
   const summaryLines = lines.filter(Boolean).join("\n");

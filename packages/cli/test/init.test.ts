@@ -42,11 +42,21 @@ vi.mock("@driftless/core", async () => {
       errors: [],
       results: [],
     }),
+    installSkills: vi.fn().mockResolvedValue({
+      installed: ["doc-generator", "e2e-writer"],
+      skillsDir: ".skills",
+    }),
   };
 });
 
 import * as p from "@clack/prompts";
-import { detectTestFramework, writeConfig, configExists, generateDocs } from "@driftless/core";
+import {
+  detectTestFramework,
+  writeConfig,
+  configExists,
+  generateDocs,
+  installSkills,
+} from "@driftless/core";
 import type { GenerateResult } from "@driftless/core";
 import { gatherConfig } from "../src/prompts/init-prompts.js";
 import { initCommand } from "../src/commands/init.js";
@@ -58,6 +68,7 @@ const mockConfigExists = vi.mocked(configExists);
 const mockConfirm = vi.mocked(p.confirm);
 const mockIsCancel = vi.mocked(p.isCancel);
 const mockGenerateDocs = vi.mocked(generateDocs);
+const mockInstallSkills = vi.mocked(installSkills);
 
 const defaultGroupResult = {
   testPaths: "tests/**/*.spec.ts",
@@ -122,6 +133,10 @@ describe("initCommand", () => {
       totalCostUsd: 0.05,
       errors: [],
       results: [],
+    });
+    mockInstallSkills.mockResolvedValue({
+      installed: ["doc-generator", "e2e-writer"],
+      skillsDir: ".skills",
     });
   });
 
@@ -318,6 +333,63 @@ describe("initCommand", () => {
         ".driftless.json",
       );
       expect(p.note).toHaveBeenCalledWith(expect.stringContaining("$0.1200"), ".driftless.json");
+    });
+  });
+
+  describe("skill installation", () => {
+    it("calls installSkills after config write when capabilities present", async () => {
+      const callOrder: string[] = [];
+      mockWriteConfig.mockImplementation(async () => {
+        callOrder.push("write");
+      });
+      mockInstallSkills.mockImplementation(async () => {
+        callOrder.push("skills");
+        return { installed: ["doc-generator", "e2e-writer"], skillsDir: ".skills" };
+      });
+
+      await initCommand(makeOptions());
+
+      expect(mockInstallSkills).toHaveBeenCalledOnce();
+      expect(mockInstallSkills).toHaveBeenCalledWith(
+        expect.objectContaining({ capabilities: expect.arrayContaining(["doc-generator"]) }),
+        expect.objectContaining({ cwd: "/tmp/test-project" }),
+      );
+      // Skills install happens after config write
+      expect(callOrder.indexOf("write")).toBeLessThan(callOrder.indexOf("skills"));
+    });
+
+    it("skips skill installation in dry-run mode", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(mockInstallSkills).not.toHaveBeenCalled();
+      expect(p.log.info).toHaveBeenCalledWith(
+        expect.stringContaining("skills would be installed but were skipped"),
+      );
+    });
+
+    it("skips skill installation when capabilities array is empty", async () => {
+      mockGroup.mockResolvedValue({
+        ...defaultGroupResult,
+        capabilities: [] as const,
+      });
+
+      await initCommand(makeOptions());
+
+      expect(mockInstallSkills).not.toHaveBeenCalled();
+    });
+
+    it("includes installed skills in summary note", async () => {
+      mockInstallSkills.mockResolvedValue({
+        installed: ["doc-generator"],
+        skillsDir: ".skills",
+      });
+
+      await initCommand(makeOptions());
+
+      expect(p.note).toHaveBeenCalledWith(
+        expect.stringContaining("Skills installed: doc-generator"),
+        ".driftless.json",
+      );
     });
   });
 });

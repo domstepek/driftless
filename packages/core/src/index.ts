@@ -21,3 +21,11 @@ export { spawnAgent, type SpawnAgentOptions } from "./agent.js";
 export { docusaurusPrompt, fumadocsPrompt, getAdapterPrompt, plainMdPrompt } from "./adapters.js";
 
 export { generateDocs, type GenerateDocsOptions } from "./generator.js";
+
+export {
+  docGeneratorTemplate,
+  e2eWriterTemplate,
+  installSkills,
+  type InstallSkillsOptions,
+  type InstallSkillsResult,
+} from "./skills.js";

@@ -66,13 +66,13 @@ Guidelines:
 ### R005 — Composable skill installer
 
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: CLI copies genericized agent skills into the target repo's `.skills/` directory (or user-specified location), configured for the user's specific repo layout and doc framework
 - Why it matters: Skills are what the GitHub Action invokes — they must be present and correctly configured in the target repo
 - Source: user
 - Primary owning slice: M001/S04
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M001/S04 — `installSkills()` writes parameterized SKILL.md files to `{skillsDir}/{name}/SKILL.md` for each selected capability. Templates are framework-dispatched (plain-md/fumadocs/docusaurus). 25 unit tests + 4 integration tests verify template content, filesystem behavior, capability gating, and init wiring.
 - Notes: Two independent skills: e2e test writer and doc generator. User picks one or both.
 
 ### R006 — Clean progress-only UX
@@ -186,13 +186,13 @@ Guidelines:
 ### R015 — Modular capability selection
 
 - Class: primary-user-loop
-- Status: active
+- Status: validated
 - Description: User can choose to install e2e test generation only, doc generation only, or both — each capability is independent and composable
 - Why it matters: Not every team wants both — some just want automated tests, some just want docs
 - Source: user
 - Primary owning slice: M001/S04
 - Supporting slices: M001/S02
-- Validation: unmapped
+- Validation: M001/S04 — `installSkills()` installs only selected capabilities. Empty capabilities = no writes. Each skill installs independently. 25 unit tests verify capability gating and independent installation.
 - Notes: Choice persisted in .driftless.json and affects which skills + actions are installed
 
 ### R016 — npm package with semantic versioning
@@ -447,7 +447,7 @@ Guidelines:
 | R002 | core-capability    | validated    | M001/S03      | none               | M001/S03 |
 | R003 | core-capability    | validated    | M001/S03      | M001/S04           | M001/S03 |
 | R004 | core-capability    | validated    | M001/S03      | M001/S04           | M001/S03 |
-| R005 | core-capability    | active       | M001/S04      | none               | unmapped |
+| R005 | core-capability    | validated    | M001/S04      | none               | M001/S04 |
 | R006 | quality-attribute  | validated    | M001/S03      | none               | M001/S03 |
 | R007 | failure-visibility | active       | M001/S05      | M001/S02, M001/S03 | unmapped |
 | R008 | failure-visibility | active       | M001/S05      | none               | unmapped |
@@ -457,7 +457,7 @@ Guidelines:
 | R012 | core-capability    | active       | M002/S01      | M002/S02           | unmapped |
 | R013 | core-capability    | active       | M002/S02      | none               | unmapped |
 | R014 | integration        | active       | M002/S01      | M002/S02           | unmapped |
-| R015 | primary-user-loop  | active       | M001/S04      | M001/S02           | unmapped |
+| R015 | primary-user-loop  | validated    | M001/S04      | M001/S02           | M001/S04 |
 | R016 | launchability      | active       | M003/S01      | none               | unmapped |
 | R017 | launchability      | active       | M003/S01      | none               | unmapped |
 | R018 | operability        | active       | M003/S02      | none               | unmapped |
@@ -483,5 +483,5 @@ Guidelines:
 
 - Active requirements: 17
 - Mapped to slices: 17
-- Validated: 10
+- Validated: 12
 - Unmapped active requirements: 0

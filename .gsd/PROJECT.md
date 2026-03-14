@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-M001/S03 complete. Core generation engine built and wired into CLI: `spawnAgent()` shells out to Claude Code headless mode per test file, three framework adapter prompt templates (plain-md, fumadocs, docusaurus) provide format-specific instructions, `generateDocs()` orchestrates the glob→spawn→write pipeline with per-file progress callbacks. Init command integrates generation with @clack/prompts spinner showing file-by-file progress when doc-generator capability is selected. 89 tests pass across both packages. Next: S04 (Skill installer + capability selection).
+M001/S04 complete. Skill installer built and wired into init flow: `docGeneratorTemplate()` and `e2eWriterTemplate()` produce parameterized SKILL.md content with framework-specific callout syntax, `installSkills()` writes them to `{skillsDir}/{name}/SKILL.md` gated on capability selection. Init command calls installer after doc generation with dry-run skip. 118 tests pass across both packages. Next: S05 (Rollback, debug logging, dry-run).
 
 ## Architecture / Key Patterns
 
