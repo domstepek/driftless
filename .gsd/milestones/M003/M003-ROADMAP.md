@@ -4,8 +4,8 @@
 
 ## Success Criteria
 
-- `npm install -g @driftless/cli && driftless --version` returns `1.0.0` (or later) from a fresh machine
-- `npx @driftless/cli@latest init` runs the full interactive wizard from the npm registry
+- `npm install -g @driftless-ai/cli && driftless --version` returns `1.0.0` (or later) from a fresh machine
+- `npx @driftless-ai/cli@latest init` runs the full interactive wizard from the npm registry
 - Pushing a `v*` tag to `main` triggers CI that publishes both packages to npm and creates a GitHub Release with changelog
 - Every PR runs test, lint, and build checks — broken PRs cannot merge
 - The GitHub repo has: MIT LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, issue templates, PR template, topics, description, and branch protection
@@ -14,13 +14,13 @@
 
 ## Key Risks / Unknowns
 
-- **npm scoped package publishing** — requires creating `@driftless` npm org, using pnpm publish (not npm publish) for workspace:* resolution, and correct two-package publish ordering (core before CLI). First-ever publish for this project.
+- **npm scoped package publishing** — ✅ RETIRED in S01. Published under `@driftless-ai` org (not `@driftless` — unavailable). Both packages live on npm at v1.0.0.
 - **npm credentials in CI** — granular access tokens with automation type must bypass 2FA. Misconfigured tokens block the entire release pipeline.
 - **CLI auto-update edge cases** — npx vs global install detection, package manager detection across npm/pnpm/yarn/bun, network failure handling, major version jump behavior. Novel code with many branches.
 
 ## Proof Strategy
 
-- npm publishing → retire in S01 by proving both packages publish and install correctly from the live npm registry
+- npm publishing → ✅ RETIRED in S01. Both packages publish and install correctly from the live npm registry under `@driftless-ai` scope.
 - CI credentials + release pipeline → retire in S02 by proving a real tagged push triggers publish + GitHub Release end-to-end
 - Auto-update edge cases → retire in S04 by proving version check, auto-install, npx detection, and network failure paths via unit tests + live registry verification
 
@@ -35,8 +35,8 @@
 
 This milestone is complete only when all are true:
 
-- Both `@driftless/core` and `@driftless/cli` are published to npm at version 1.0.0+
-- `npx @driftless/cli@latest init` works when installed from the npm registry (not just local)
+- Both `@driftless-ai/core` and `@driftless-ai/cli` are published to npm at version 1.0.0+
+- `npx @driftless-ai/cli@latest init` works when installed from the npm registry (not just local)
 - A tagged release triggers automated npm publish and GitHub Release creation with changelog
 - PR CI runs test, lint, build and blocks merge on failure
 - GitHub repo has MIT LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, issue/PR templates, topics, description, branch protection
@@ -57,7 +57,7 @@ This milestone is complete only when all are true:
 ## Slices
 
 - [x] **S01: npm Package Publishing + v1.0.0 Release** `risk:high` `depends:[]`
-  > After this: `npm install -g @driftless/cli && driftless --version` returns 1.0.0, installed from the live npm registry. CHANGELOG.md summarizes all M001+M002 work. Both `@driftless/core` and `@driftless/cli` are live on npmjs.com.
+  > After this: `npm install -g @driftless-ai/cli && driftless --version` returns 1.0.0, installed from the live npm registry. CHANGELOG.md summarizes all M001+M002 work. Both `@driftless-ai/core` and `@driftless-ai/cli` are live on npmjs.com.
 - [ ] **S02: CI/CD Pipeline + Automated Releases** `risk:medium` `depends:[S01]`
   > After this: pushing a `v1.0.1` tag to main triggers GitHub Actions that runs tests, publishes both packages to npm with provenance, and creates a GitHub Release with changelog body. PRs run test+lint+build and block merge on failure.
 - [ ] **S03: README + Community Files + Repo Hygiene** `risk:low` `depends:[S01]`
@@ -81,9 +81,9 @@ Consumes:
 ### S01 → S03
 
 Produces:
-- Published package name (`@driftless/cli`) and npm URL for README install instructions and badges
+- Published package name (`@driftless-ai/cli`) and npm URL for README install instructions and badges
 - Version number (1.0.0) for badge display
-- Verified `npx @driftless/cli@latest init` invocation pattern for README examples
+- Verified `npx @driftless-ai/cli@latest init` invocation pattern for README examples
 
 Consumes:
 - nothing (first slice)
@@ -92,7 +92,7 @@ Consumes:
 
 Produces:
 - Published package on npm registry (version check target)
-- Package name for registry API URL: `https://registry.npmjs.org/@driftless/cli/latest`
+- Package name for registry API URL: `https://registry.npmjs.org/@driftless-ai/cli/latest`
 - `DriftlessConfig` type and config read/write pattern in `packages/core/src/config.ts`
 
 Consumes:

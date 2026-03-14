@@ -351,6 +351,18 @@ Guidelines:
 - Validation: M001/S01 — all tsconfig.json files have strict:true, all package.json files have "type":"module", build output is ESM (.mjs), runtime verified with node packages/cli/dist/index.mjs.
 - Notes: none
 
+### R036 — CLI auto-update
+
+- Class: quality-attribute
+- Status: active
+- Description: CLI checks npm registry for newer versions on launch when `autoUpdate: true` in `.driftless.json`, detects installed package manager, and auto-updates. Network failures skip silently. npx users get version notification instead of auto-update. Major version jumps warn but still update.
+- Why it matters: Users stay current without manual intervention — reduces support burden and ensures docs are generated with latest adapters
+- Source: user
+- Primary owning slice: M003/S04
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Adds `autoUpdate` and `packageManager` fields to DriftlessConfig
+
 ## Deferred
 
 ### R026 — `driftless eject` command
@@ -478,10 +490,11 @@ Guidelines:
 | R033 | constraint         | validated    | M001/S01      | none               | M001/S01 |
 | R034 | constraint         | validated    | M001/S01      | none               | M001/S01 |
 | R035 | quality-attribute  | validated    | M001/S01      | none               | M001/S01 |
+| R036 | quality-attribute  | active       | M003/S04      | none               | unmapped |
 
 ## Coverage Summary
 
-- Active requirements: 8
-- Mapped to slices: 8
+- Active requirements: 9
+- Mapped to slices: 9
 - Validated: 20
 - Unmapped active requirements: 0
