@@ -30,37 +30,37 @@ Guidelines:
 ### R002 — E2E test framework agnostic
 
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: The agent reads and interprets any e2e test suite (Playwright, Cypress, Selenium, TestCafe, Detox, etc.) without framework-specific parsers
 - Why it matters: Broadens adoption — any team with e2e tests can use driftless, not just Playwright/Cypress shops
 - Source: user
 - Primary owning slice: M001/S03
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M001/S03 — spawnAgent() sends raw test content via stdin with no framework-specific parsing; adapter prompts instruct the agent to interpret any test framework. 9 agent tests + 22 adapter tests verify the pipeline mechanics.
 - Notes: Claude Code does the interpretation; no custom parsers needed
 
 ### R003 — Agent-driven doc generation via Claude Code CLI
 
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: CLI spawns Claude Code in headless mode to generate markdown training docs from e2e test files
 - Why it matters: This is the core value proposition — tests become docs
 - Source: user
 - Primary owning slice: M001/S03
 - Supporting slices: M001/S04
-- Validation: unmapped
+- Validation: M001/S03 — spawnAgent() spawns `claude -p --output-format json` with stdin piping, timeout escalation, and JSON result parsing. generateDocs() orchestrates per-file generation with glob resolution, output writing, and error accumulation. 9 agent + 8 generator + 6 init integration tests verify the full pipeline.
 - Notes: Clean progress-only UX with spinner; full agent output saved to debug log
 
 ### R004 — Framework-specific doc adapters
 
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: Generated docs match the user's chosen framework format — plain markdown (default), fumadocs MDX, or docusaurus MDX
 - Why it matters: Docs must fit into the user's existing docs site without manual conversion
 - Source: user
 - Primary owning slice: M001/S03
 - Supporting slices: M001/S04
-- Validation: unmapped
+- Validation: M001/S03 — Three adapter prompt templates (plainMdPrompt, fumadocsPrompt, docusaurusPrompt) produce framework-specific frontmatter, callout/admonition syntax, and file extension rules. getAdapterPrompt dispatcher routes by DocFramework. 22 adapter tests verify format markers and routing.
 - Notes: Framework choice baked into installed skill so all subsequent generations use the right format
 
 ### R005 — Composable skill installer
@@ -78,13 +78,13 @@ Guidelines:
 ### R006 — Clean progress-only UX
 
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: During doc generation, user sees a spinner with file-by-file progress (e.g. "Processing sample-assignment.cy.ts... 3/12 files"), not raw Claude output
 - Why it matters: Professional UX — the tool should feel polished, not like watching an AI think
 - Source: user
 - Primary owning slice: M001/S03
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M001/S03 — Init command creates @clack/prompts spinner, updates message per file via ProgressCallback, hides agent stdout/stderr. 6 init generation tests verify spinner lifecycle, progress updates, and error reporting.
 - Notes: Full inference output saved to debug log for troubleshooting
 
 ### R007 — Debug logging for issue reporting
@@ -444,11 +444,11 @@ Guidelines:
 | ID   | Class              | Status       | Primary owner | Supporting         | Proof    |
 | ---- | ------------------ | ------------ | ------------- | ------------------ | -------- |
 | R001 | primary-user-loop  | validated    | M001/S02      | none               | M001/S02 |
-| R002 | core-capability    | active       | M001/S03      | none               | unmapped |
-| R003 | core-capability    | active       | M001/S03      | M001/S04           | unmapped |
-| R004 | core-capability    | active       | M001/S03      | M001/S04           | unmapped |
+| R002 | core-capability    | validated    | M001/S03      | none               | M001/S03 |
+| R003 | core-capability    | validated    | M001/S03      | M001/S04           | M001/S03 |
+| R004 | core-capability    | validated    | M001/S03      | M001/S04           | M001/S03 |
 | R005 | core-capability    | active       | M001/S04      | none               | unmapped |
-| R006 | quality-attribute  | active       | M001/S03      | none               | unmapped |
+| R006 | quality-attribute  | validated    | M001/S03      | none               | M001/S03 |
 | R007 | failure-visibility | active       | M001/S05      | M001/S02, M001/S03 | unmapped |
 | R008 | failure-visibility | active       | M001/S05      | none               | unmapped |
 | R009 | core-capability    | validated    | M001/S02      | M001/S03, M001/S04 | M001/S02 |
@@ -481,7 +481,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 21
-- Mapped to slices: 21
-- Validated: 6
+- Active requirements: 17
+- Mapped to slices: 17
+- Validated: 10
 - Unmapped active requirements: 0

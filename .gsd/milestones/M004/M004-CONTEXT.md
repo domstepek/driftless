@@ -5,7 +5,9 @@
 
 ## Project Description
 
-M004 is the go-to-market milestone. It builds the public-facing surfaces that drive adoption: a polished Vercel landing page, a fumadocs documentation site, and a researched day-by-day X/Twitter launch playbook targeting SWE communities.
+M004 is the **OSS tool launch** milestone. It builds the public-facing surfaces that drive adoption: a polished Vercel landing page, a fumadocs documentation site, and a researched day-by-day X/Twitter launch playbook targeting SWE communities.
+
+**Distinction from M005:** M004 is the product launch (OSS community adoption, free tier). M005 is the business launch (monetization infrastructure, paid tier, legal entity). M004 must complete before M005 adds the pricing page to the landing site.
 
 ## Why This Milestone
 
@@ -19,6 +21,10 @@ The tool is built (M001), automated (M002), and published (M003). Now it needs u
 - Read comprehensive documentation on installation, configuration, usage, and troubleshooting
 - The maintainer has a researched, actionable day-by-day playbook for launching on X/Twitter
 
+### Deliverable output
+
+- All planning documents (launch playbook, GTM strategy) written to `~/Desktop/driftless/m004-launch-playbook.md` — detailed enough to execute the launch without additional research
+
 ### Entry point / environment
 
 - Entry point: Landing page URL (Vercel), docs site URL, X/Twitter
@@ -27,7 +33,7 @@ The tool is built (M001), automated (M002), and published (M003). Now it needs u
 
 ## Completion Class
 
-- Contract complete means: landing page deployed on Vercel, docs site deployed, playbook document written
+- Contract complete means: landing page deployed on Vercel, docs site deployed, playbook document written to `~/Desktop/driftless/m004-launch-playbook.md`
 - Integration complete means: landing page links to docs, docs link to GitHub, all cross-references work
 - Operational complete means: Vercel deploys on push, docs site builds correctly
 
@@ -37,7 +43,7 @@ To call this milestone complete, we must prove:
 
 - Landing page is live on a Vercel URL, loads correctly, and clearly communicates what driftless does
 - Docs site covers: quick start, full init walkthrough, GitHub Action setup, configuration reference, troubleshooting
-- Launch playbook is a complete, actionable document with day-by-day X/Twitter posts, timing, hashtags, and engagement strategy
+- Launch playbook exists at `~/Desktop/driftless/m004-launch-playbook.md` with day-by-day X/Twitter posts, timing, hashtags, engagement strategy, and Mermaid diagrams — detailed enough to start executing the day M004 completes
 - The playbook format and content were informed by google_search research on SWE community engagement on X
 
 ## Risks and Unknowns

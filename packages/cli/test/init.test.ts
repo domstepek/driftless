@@ -2,6 +2,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { DriftlessConfig, InitOptions } from "@driftless/core";
 
 // Mock @clack/prompts
+const mockSpinner = {
+  start: vi.fn(),
+  stop: vi.fn(),
+  message: vi.fn(),
+};
 vi.mock("@clack/prompts", () => ({
   group: vi.fn(),
   text: vi.fn(),
@@ -11,6 +16,7 @@ vi.mock("@clack/prompts", () => ({
   intro: vi.fn(),
   outro: vi.fn(),
   note: vi.fn(),
+  spinner: vi.fn(() => mockSpinner),
   log: {
     info: vi.fn(),
     message: vi.fn(),
@@ -29,11 +35,19 @@ vi.mock("@driftless/core", async () => {
     detectTestFramework: vi.fn(),
     writeConfig: vi.fn().mockResolvedValue(undefined),
     configExists: vi.fn().mockResolvedValue(false),
+    generateDocs: vi.fn().mockResolvedValue({
+      filesGenerated: 2,
+      filesErrored: 0,
+      totalCostUsd: 0.05,
+      errors: [],
+      results: [],
+    }),
   };
 });
 
 import * as p from "@clack/prompts";
-import { detectTestFramework, writeConfig, configExists } from "@driftless/core";
+import { detectTestFramework, writeConfig, configExists, generateDocs } from "@driftless/core";
+import type { GenerateResult } from "@driftless/core";
 import { gatherConfig } from "../src/prompts/init-prompts.js";
 import { initCommand } from "../src/commands/init.js";
 
@@ -43,6 +57,7 @@ const mockWriteConfig = vi.mocked(writeConfig);
 const mockConfigExists = vi.mocked(configExists);
 const mockConfirm = vi.mocked(p.confirm);
 const mockIsCancel = vi.mocked(p.isCancel);
+const mockGenerateDocs = vi.mocked(generateDocs);
 
 const defaultGroupResult = {
   testPaths: "tests/**/*.spec.ts",
@@ -101,6 +116,13 @@ describe("initCommand", () => {
     mockGroup.mockResolvedValue(defaultGroupResult);
     mockConfigExists.mockResolvedValue(false);
     mockWriteConfig.mockResolvedValue(undefined);
+    mockGenerateDocs.mockResolvedValue({
+      filesGenerated: 2,
+      filesErrored: 0,
+      totalCostUsd: 0.05,
+      errors: [],
+      results: [],
+    });
   });
 
   it("calls detect → gather → write in order", async () => {
@@ -194,5 +216,108 @@ describe("initCommand", () => {
   it("shows summary note after writing", async () => {
     await initCommand(makeOptions());
     expect(p.note).toHaveBeenCalledWith(expect.stringContaining("Test paths"), ".driftless.json");
+  });
+
+  describe("doc generation", () => {
+    const successResult: GenerateResult = {
+      filesGenerated: 3,
+      filesErrored: 0,
+      totalCostUsd: 0.12,
+      errors: [],
+      results: [],
+    };
+
+    const partialResult: GenerateResult = {
+      filesGenerated: 1,
+      filesErrored: 2,
+      totalCostUsd: 0.04,
+      errors: [
+        { file: "tests/a.spec.ts", error: "timed out" },
+        { file: "tests/b.spec.ts", error: "non-zero exit" },
+      ],
+      results: [],
+    };
+
+    const allFailedResult: GenerateResult = {
+      filesGenerated: 0,
+      filesErrored: 3,
+      totalCostUsd: 0,
+      errors: [
+        { file: "tests/a.spec.ts", error: "timed out" },
+        { file: "tests/b.spec.ts", error: "non-zero exit" },
+        { file: "tests/c.spec.ts", error: "spawn error" },
+      ],
+      results: [],
+    };
+
+    it("calls generateDocs with correct config when doc-generator in capabilities", async () => {
+      mockGenerateDocs.mockResolvedValue(successResult);
+      await initCommand(makeOptions());
+
+      expect(mockGenerateDocs).toHaveBeenCalledOnce();
+      expect(mockGenerateDocs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          capabilities: expect.arrayContaining(["doc-generator"]),
+        }),
+        expect.objectContaining({
+          cwd: "/tmp/test-project",
+          onProgress: expect.any(Function),
+        }),
+      );
+      expect(mockSpinner.start).toHaveBeenCalledWith("Generating docs…");
+      expect(mockSpinner.stop).toHaveBeenCalledWith("Generated 3 docs.");
+    });
+
+    it("does not call generateDocs when doc-generator not in capabilities", async () => {
+      mockGroup.mockResolvedValue({
+        ...defaultGroupResult,
+        capabilities: ["e2e-writer"] as const,
+      });
+
+      await initCommand(makeOptions());
+
+      expect(mockGenerateDocs).not.toHaveBeenCalled();
+      expect(mockSpinner.start).not.toHaveBeenCalled();
+    });
+
+    it("does not call generateDocs in dry-run mode", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(mockGenerateDocs).not.toHaveBeenCalled();
+      expect(p.log.info).toHaveBeenCalledWith(
+        expect.stringContaining("doc generation would run but was skipped"),
+      );
+    });
+
+    it("shows error spinner and warnings when generation has failures", async () => {
+      mockGenerateDocs.mockResolvedValue(allFailedResult);
+      await initCommand(makeOptions());
+
+      expect(mockSpinner.stop).toHaveBeenCalledWith(
+        "Doc generation failed — all files errored.",
+        1,
+      );
+      expect(p.log.warn).toHaveBeenCalledTimes(3);
+      expect(p.log.warn).toHaveBeenCalledWith(expect.stringContaining("tests/a.spec.ts"));
+    });
+
+    it("shows partial success spinner when some files fail", async () => {
+      mockGenerateDocs.mockResolvedValue(partialResult);
+      await initCommand(makeOptions());
+
+      expect(mockSpinner.stop).toHaveBeenCalledWith(expect.stringContaining("1 ok, 2 failed"), 1);
+      expect(p.log.warn).toHaveBeenCalledTimes(2);
+    });
+
+    it("includes generation stats in summary note", async () => {
+      mockGenerateDocs.mockResolvedValue(successResult);
+      await initCommand(makeOptions());
+
+      expect(p.note).toHaveBeenCalledWith(
+        expect.stringContaining("Docs generated: 3"),
+        ".driftless.json",
+      );
+      expect(p.note).toHaveBeenCalledWith(expect.stringContaining("$0.1200"), ".driftless.json");
+    });
   });
 });

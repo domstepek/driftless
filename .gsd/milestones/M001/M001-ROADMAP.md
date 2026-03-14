@@ -59,7 +59,7 @@ This milestone is complete only when all are true:
 
   > After this: `npx driftless init` runs an interactive wizard — detects test framework config, prompts for paths/framework/capabilities, writes `.driftless.json`. No doc generation yet, but the full prompt flow works end-to-end.
 
-- [ ] **S03: Agent-driven doc generation** `risk:high` `depends:[S02]`
+- [x] **S03: Agent-driven doc generation** `risk:high` `depends:[S02]`
 
   > After this: The CLI spawns Claude Code in headless mode, passes e2e test files, and receives generated markdown docs in the correct framework format. Progress spinner shows file-by-file status. This proves the core thesis.
 

@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-M001/S02 complete. Interactive CLI wizard fully implemented: `driftless init` runs an interactive prompt flow (test framework auto-detection across 6 frameworks, test path/output dir/doc framework/capabilities prompts via @clack/prompts, config write to `.driftless.json` with atomic writes). CLI routes init/--version/--help/--dry-run. 44 tests pass across both packages. Next: S03 (Agent-driven doc generation).
+M001/S03 complete. Core generation engine built and wired into CLI: `spawnAgent()` shells out to Claude Code headless mode per test file, three framework adapter prompt templates (plain-md, fumadocs, docusaurus) provide format-specific instructions, `generateDocs()` orchestrates the glob→spawn→write pipeline with per-file progress callbacks. Init command integrates generation with @clack/prompts spinner showing file-by-file progress when doc-generator capability is selected. 89 tests pass across both packages. Next: S04 (Skill installer + capability selection).
 
 ## Architecture / Key Patterns
 
@@ -33,7 +33,8 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 - [ ] M001: Core CLI + E2E-to-Docs Engine — Setup wizard, agent-driven doc generation from any e2e tests, skill installer
 - [ ] M002: GitHub Actions + PR Automation — Distributable actions for doc staleness detection, doc updates, and e2e test generation in user repos
 - [ ] M003: OSS Maturity + v1.0 Release — npm publish pipeline, semantic releases, CHANGELOG, CI for driftless, community files, repo hygiene
-- [ ] M004: Product Launch — Vercel landing page, fumadocs docs site, X/Twitter day-by-day launch playbook
+- [ ] M004: Product Launch — Vercel landing page, fumadocs docs site, X/Twitter OSS launch playbook (output to ~/Desktop/driftless/)
+- [ ] M005: Business Infrastructure + Monetization — Driftless LLC (NY) formation, Lemon Squeezy payment infrastructure, GitHub Action license gate for Pro tier, pricing page, comprehensive business plan (output to ~/Desktop/driftless/)
 
 ## Notes
 

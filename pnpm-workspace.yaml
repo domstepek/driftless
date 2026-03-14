@@ -1,14 +1,16 @@
 packages:
   - packages/*
 
-catalogMode: prefer
-
 catalog:
+  "@types/minimatch": ^6.0.0
   "@types/node": ^22
+  minimatch: ^10.2.4
   typescript: ^5
   vite: npm:@voidzero-dev/vite-plus-core@0.1.11
-  vitest: npm:@voidzero-dev/vite-plus-test@0.1.11
   vite-plus: 0.1.11
+  vitest: npm:@voidzero-dev/vite-plus-test@0.1.11
+
+catalogMode: prefer
 
 overrides:
   vite: "catalog:"

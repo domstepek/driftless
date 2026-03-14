@@ -45,7 +45,7 @@ To call this milestone complete, we must prove:
 
 - **npm publish permissions and scoping** — need to decide on package name availability, scoped vs unscoped, 2FA requirements
 - **Vite+ pack for npm** — need to verify `vp pack` produces a correct npm-publishable package with proper exports, types, and bin fields
-- **OSS community patterns** — first OSS project for this team; learning by doing (captured in oss-repo-setup skill)
+- **GitHub Sponsors setup** — account must be enrolled in GitHub Sponsors (personal profile) before FUNDING.yml renders the button. This is a GitHub UI task; agent-browser (native mode) handles it. Some waitlist delay possible — start this early in M003.
 
 ## Existing Codebase / Prior Art
 
@@ -60,7 +60,7 @@ To call this milestone complete, we must prove:
 - R016 — npm package with semantic versioning
 - R017 — CHANGELOG.md with conventional commits
 - R018 — CI/CD pipeline for driftless repo
-- R019 — OSS community files
+- R019 — OSS community files (MIT license, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, FUNDING.yml)
 - R020 — GitHub repo hygiene
 - R025 — Claude-first documented in README
 
@@ -74,6 +74,7 @@ To call this milestone complete, we must prove:
 - MIT LICENSE, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md
 - GitHub issue templates, PR template
 - GitHub repo: topics, description, branch protection (via agent-browser)
+- `.github/FUNDING.yml` — GitHub Sponsors button (individual account); requires enabling GitHub Sponsors for the account first (GitHub UI, agent-browser)
 - README with badges, install, usage, API, contributing sections
 
 ### Out of Scope / Non-Goals

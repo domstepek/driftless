@@ -17,9 +17,16 @@
     "test": "vp test"
   },
   "devDependencies": {
+    "@types/minimatch": "catalog:",
     "@types/node": "catalog:",
+    "minimatch": "catalog:",
     "typescript": "catalog:",
     "vite-plus": "catalog:",
     "vitest": "catalog:"
+  },
+  "inlinedDependencies": {
+    "balanced-match": "4.0.4",
+    "brace-expansion": "5.0.4",
+    "minimatch": "10.2.4"
   }
 }
