@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-M001/S01 complete. pnpm monorepo with two library packages (`packages/cli`, `packages/core`) and Vite+ v0.1.11 toolchain operational. CLI prints `driftless v0.0.0`, core exports S02 boundary types (DriftlessConfig, InitOptions, DocFramework). Build, format/lint, and 5 smoke tests all pass. Next: S02 (Interactive CLI wizard).
+M001/S02 complete. Interactive CLI wizard fully implemented: `driftless init` runs an interactive prompt flow (test framework auto-detection across 6 frameworks, test path/output dir/doc framework/capabilities prompts via @clack/prompts, config write to `.driftless.json` with atomic writes). CLI routes init/--version/--help/--dry-run. 44 tests pass across both packages. Next: S03 (Agent-driven doc generation).
 
 ## Architecture / Key Patterns
 

@@ -18,13 +18,13 @@ Guidelines:
 ### R001 — Interactive CLI setup wizard
 
 - Class: primary-user-loop
-- Status: active
+- Status: validated
 - Description: `npx driftless init` runs an interactive wizard that prompts for e2e test paths, docs output location, doc framework preference, capability selection, and agent harness verification
 - Why it matters: This is the primary entry point — the first thing every user does
 - Source: user
 - Primary owning slice: M001/S02
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M001/S02 — full prompt flow via @clack/prompts group(), CLI routing for init/version/help/dry-run, 11 init tests + 8 CLI tests pass, bundle executes --version and --help correctly
 - Notes: Uses `@clack/prompts` for Vercel-style UX
 
 ### R002 — E2E test framework agnostic
@@ -114,25 +114,25 @@ Guidelines:
 ### R009 — Config file persisting init choices
 
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: Init writes a `.driftless.json` config file persisting all choices (test paths, docs location, framework, capabilities) so re-runs and the GitHub Action share configuration
 - Why it matters: Config is the bridge between init and the GitHub Action — without it, the Action doesn't know what to do
 - Source: research
 - Primary owning slice: M001/S02
 - Supporting slices: M001/S03, M001/S04
-- Validation: unmapped
+- Validation: M001/S02 — config round-trips through `.driftless.json`, atomic writes verified (temp+rename), configExists works, 8 config tests pass
 - Notes: none
 
 ### R010 — Test framework auto-detection
 
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: CLI detects existing e2e test configuration files (playwright.config.ts, cypress.config.js, etc.) to pre-fill prompts
 - Why it matters: Reduces friction — users shouldn't have to tell the tool what it can discover
 - Source: research
 - Primary owning slice: M001/S02
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M001/S02 — detectTestFramework() scans 6 frameworks (Playwright, Cypress, TestCafe, Detox, WebdriverIO, Nightwatch) via config file presence, 11 detection tests pass including priority ordering and undefined for no match
 - Notes: Auto-detection is a convenience; user can always override
 
 ### R011 — `--dry-run` flag
@@ -443,7 +443,7 @@ Guidelines:
 
 | ID   | Class              | Status       | Primary owner | Supporting         | Proof    |
 | ---- | ------------------ | ------------ | ------------- | ------------------ | -------- |
-| R001 | primary-user-loop  | active       | M001/S02      | none               | unmapped |
+| R001 | primary-user-loop  | validated    | M001/S02      | none               | M001/S02 |
 | R002 | core-capability    | active       | M001/S03      | none               | unmapped |
 | R003 | core-capability    | active       | M001/S03      | M001/S04           | unmapped |
 | R004 | core-capability    | active       | M001/S03      | M001/S04           | unmapped |
@@ -451,8 +451,8 @@ Guidelines:
 | R006 | quality-attribute  | active       | M001/S03      | none               | unmapped |
 | R007 | failure-visibility | active       | M001/S05      | M001/S02, M001/S03 | unmapped |
 | R008 | failure-visibility | active       | M001/S05      | none               | unmapped |
-| R009 | core-capability    | active       | M001/S02      | M001/S03, M001/S04 | unmapped |
-| R010 | quality-attribute  | active       | M001/S02      | none               | unmapped |
+| R009 | core-capability    | validated    | M001/S02      | M001/S03, M001/S04 | M001/S02 |
+| R010 | quality-attribute  | validated    | M001/S02      | none               | M001/S02 |
 | R011 | quality-attribute  | active       | M001/S05      | none               | unmapped |
 | R012 | core-capability    | active       | M002/S01      | M002/S02           | unmapped |
 | R013 | core-capability    | active       | M002/S02      | none               | unmapped |
@@ -481,7 +481,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 24
-- Mapped to slices: 24
-- Validated: 3
+- Active requirements: 21
+- Mapped to slices: 21
+- Validated: 6
 - Unmapped active requirements: 0

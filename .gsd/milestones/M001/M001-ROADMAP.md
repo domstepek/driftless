@@ -55,7 +55,7 @@ This milestone is complete only when all are true:
 
   > After this: `vp build`, `vp check`, `vp test` all pass on the project skeleton. CLI package has a working entry point that prints `driftless v0.0.0`. The monorepo structure is real and exercised — not just files on disk.
 
-- [ ] **S02: Interactive CLI wizard** `risk:medium` `depends:[S01]`
+- [x] **S02: Interactive CLI wizard** `risk:medium` `depends:[S01]`
 
   > After this: `npx driftless init` runs an interactive wizard — detects test framework config, prompts for paths/framework/capabilities, writes `.driftless.json`. No doc generation yet, but the full prompt flow works end-to-end.
 

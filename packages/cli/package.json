@@ -20,6 +20,7 @@
     "test": "vp test"
   },
   "dependencies": {
+    "@clack/prompts": "^0.10.0",
     "@driftless/core": "workspace:*"
   },
   "devDependencies": {
