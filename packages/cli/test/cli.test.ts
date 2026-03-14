@@ -27,7 +27,7 @@ describe("CLI entry point", () => {
   it("-V prints version string to stdout", async () => {
     await main(["-V"]);
     expect(logSpy).toHaveBeenCalledOnce();
-    expect(logSpy.mock.calls[0]?.[0]).toBe("driftless v0.0.0");
+    expect(logSpy.mock.calls[0]?.[0]).toBe("driftless v1.0.0");
   });
 
   it("--help prints usage text", async () => {

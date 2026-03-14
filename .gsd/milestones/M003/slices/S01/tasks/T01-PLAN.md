@@ -52,3 +52,10 @@ All code and metadata changes needed before npm publishing. Rename the CLI packa
 - `packages/core/package.json` — at 1.0.0 with full metadata
 - `CHANGELOG.md` — v1.0.0 entry at repo root
 - Clean build, clean tests, verified tarballs ready for `pnpm publish`
+
+## Observability Impact
+
+- **`driftless --version` output changes** from `driftless v0.0.0` to `@driftless/cli v1.0.0` (or similar) — a future agent can verify version propagation by running the built binary
+- **Tarball names change** — `pnpm pack` in cli now produces `driftless-cli-1.0.0.tgz` (reflecting scoped name), core produces `driftless-core-1.0.0.tgz` (reflecting version bump)
+- **Package metadata inspectable** via `npm pkg get` or `jq` on package.json — repository, license, homepage fields exist where they were previously absent
+- **Workspace dependency resolution** visible in packed tarball's package.json — `workspace:*` becomes `1.0.0`, verifiable by extracting and grepping

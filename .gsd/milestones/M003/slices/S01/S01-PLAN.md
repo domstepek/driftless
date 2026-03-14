@@ -26,10 +26,12 @@
 - `npm info @driftless/cli@1.0.0 version` — returns `1.0.0`
 - `npm install -g @driftless/cli && driftless --version` — returns `1.0.0` (or version string containing it)
 - `npx @driftless/cli@latest --help` — shows usage with init command
+- `pnpm publish -C packages/core --dry-run 2>&1` — succeeds (no auth/scope errors beyond expected "not logged in" if unauthenticated)
+- `pnpm publish -C packages/cli --dry-run 2>&1` — succeeds with `@driftless/cli` name and `access: public`
 
 ## Tasks
 
-- [ ] **T01: Prepare package metadata, CHANGELOG, and verify tarballs** `est:45m`
+- [x] **T01: Prepare package metadata, CHANGELOG, and verify tarballs** `est:45m`
   - Why: All code and metadata changes needed before publishing — rename, version bump, npm fields, CHANGELOG. No external dependencies required.
   - Files: `packages/cli/package.json`, `packages/core/package.json`, `CHANGELOG.md`, `package.json`
   - Do: Rename CLI to `@driftless/cli`. Bump both packages to 1.0.0. Add `repository`, `license`, `homepage`, `keywords`, `author` fields to both packages. Write CHANGELOG.md v1.0.0 entry summarizing M001 (CLI + doc engine) and M002 (GitHub Actions workflows). Verify build, run tests, verify pack tarballs have correct contents and `workspace:*` resolves to `1.0.0`.
@@ -42,6 +44,16 @@
   - Do: Confirm user has created `@driftless` npm org. Publish core first, then CLI (or `pnpm publish -r --access public`). Verify both packages are live. Test install from registry. Tag `v1.0.0`.
   - Verify: `npm info @driftless/core@1.0.0` and `npm info @driftless/cli@1.0.0` return valid metadata. `npm install -g @driftless/cli && driftless --version` returns 1.0.0. `npx @driftless/cli@latest --help` shows usage.
   - Done when: Both packages live on npm, install + version verified, `v1.0.0` tag pushed.
+
+## Observability / Diagnostics
+
+- **Version surface:** `driftless --version` reports `1.0.0` from the built binary — proves version bump propagated through build
+- **Package name surface:** `pnpm pack -C packages/cli` produces tarball named `driftless-cli-1.0.0.tgz` (not `driftless-1.0.0.tgz`) — proves rename took effect
+- **Dependency resolution:** `tar xf <cli-tgz> --to-stdout package/package.json | jq '.dependencies["@driftless/core"]'` returns `"1.0.0"` — proves workspace:* resolved
+- **Metadata completeness:** `npm pkg get repository license homepage --prefix packages/core` returns non-empty values for all three fields
+- **Publish readiness:** `pnpm publish -C packages/core --dry-run` and `pnpm publish -C packages/cli --dry-run` succeed without error — proves publishConfig and access are correct
+- **Failure visibility:** If publish fails due to missing scope org, npm returns `E403: 403 Forbidden - PUT https://registry.npmjs.org/@driftless%2fcore - Scope not found` — actionable error pointing to npm org creation
+- **Redaction:** No npm tokens, OTP codes, or auth credentials appear in any artifact or log output
 
 ## Files Likely Touched
 
