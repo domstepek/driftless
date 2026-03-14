@@ -5,6 +5,17 @@ vi.mock("../src/commands/init.js", () => ({
   initCommand: vi.fn().mockResolvedValue(undefined),
 }));
 
+// Mock @driftless-ai/core to control auto-update behavior in CLI tests
+const mockConfigExists = vi.fn().mockResolvedValue(false);
+const mockReadConfig = vi.fn().mockResolvedValue({});
+const mockPerformUpdate = vi.fn().mockResolvedValue(null);
+
+vi.mock("@driftless-ai/core", () => ({
+  configExists: (...args: unknown[]) => mockConfigExists(...args),
+  readConfig: (...args: unknown[]) => mockReadConfig(...args),
+  performUpdate: (...args: unknown[]) => mockPerformUpdate(...args),
+}));
+
 const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -15,6 +26,10 @@ describe("CLI entry point", () => {
   beforeEach(() => {
     logSpy.mockClear();
     errorSpy.mockClear();
+    mockConfigExists.mockClear();
+    mockReadConfig.mockClear();
+    mockPerformUpdate.mockClear();
+    mockConfigExists.mockResolvedValue(false);
     process.exitCode = undefined;
   });
 
@@ -81,5 +96,67 @@ describe("CLI entry point", () => {
         dryRun: true,
       }),
     );
+  });
+
+  // --- Auto-update hook tests ---
+
+  describe("auto-update hook", () => {
+    it("does not call performUpdate when no config exists", async () => {
+      mockConfigExists.mockResolvedValue(false);
+      await main(["init"]);
+      expect(mockPerformUpdate).not.toHaveBeenCalled();
+    });
+
+    it("does not call performUpdate when autoUpdate is false", async () => {
+      mockConfigExists.mockResolvedValue(true);
+      mockReadConfig.mockResolvedValue({ autoUpdate: false });
+      await main(["init"]);
+      expect(mockPerformUpdate).not.toHaveBeenCalled();
+    });
+
+    it("does not call performUpdate when autoUpdate is undefined", async () => {
+      mockConfigExists.mockResolvedValue(true);
+      mockReadConfig.mockResolvedValue({});
+      await main(["init"]);
+      expect(mockPerformUpdate).not.toHaveBeenCalled();
+    });
+
+    it("calls performUpdate when config has autoUpdate: true", async () => {
+      mockConfigExists.mockResolvedValue(true);
+      mockReadConfig.mockResolvedValue({ autoUpdate: true, packageManager: "pnpm" });
+      await main(["init"]);
+      expect(mockPerformUpdate).toHaveBeenCalledOnce();
+      expect(mockPerformUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          currentVersion: expect.any(String),
+          config: { packageManager: "pnpm" },
+        }),
+      );
+    });
+
+    it("silently swallows errors from performUpdate", async () => {
+      mockConfigExists.mockResolvedValue(true);
+      mockReadConfig.mockResolvedValue({ autoUpdate: true });
+      mockPerformUpdate.mockRejectedValue(new Error("network down"));
+      // Should not throw — command still runs
+      await main(["init"]);
+      expect(mockPerformUpdate).toHaveBeenCalledOnce();
+    });
+
+    it("--version skips auto-update entirely", async () => {
+      mockConfigExists.mockResolvedValue(true);
+      mockReadConfig.mockResolvedValue({ autoUpdate: true });
+      await main(["--version"]);
+      expect(mockConfigExists).not.toHaveBeenCalled();
+      expect(mockPerformUpdate).not.toHaveBeenCalled();
+    });
+
+    it("--help skips auto-update entirely", async () => {
+      mockConfigExists.mockResolvedValue(true);
+      mockReadConfig.mockResolvedValue({ autoUpdate: true });
+      await main(["--help"]);
+      expect(mockConfigExists).not.toHaveBeenCalled();
+      expect(mockPerformUpdate).not.toHaveBeenCalled();
+    });
   });
 });

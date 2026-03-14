@@ -80,6 +80,17 @@ export async function gatherConfig(options: GatherConfigOptions = {}): Promise<D
     },
   );
 
+  // Auto-update preference — asked after the main group to keep the group focused
+  const autoUpdateChoice = await p.confirm({
+    message: "Auto-update driftless CLI when a newer version is available?",
+    initialValue: true,
+  });
+
+  if (p.isCancel(autoUpdateChoice)) {
+    p.cancel("Setup cancelled.");
+    process.exit(0);
+  }
+
   return {
     testPaths: [result.testPaths],
     outputDir: result.outputDir,
@@ -88,5 +99,6 @@ export async function gatherConfig(options: GatherConfigOptions = {}): Promise<D
     skillsDir: result.skillsDir,
     testFramework: options.detectedFramework,
     agentHarness: "claude-code",
+    autoUpdate: autoUpdateChoice,
   };
 }

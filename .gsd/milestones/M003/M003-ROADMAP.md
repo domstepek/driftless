@@ -62,7 +62,7 @@ This milestone is complete only when all are true:
   > After this: pushing a `v1.0.1` tag to main triggers GitHub Actions that runs tests, publishes both packages to npm with provenance, and creates a GitHub Release with changelog body. PRs run test+lint+build and block merge on failure.
 - [x] **S03: README + Community Files + Repo Hygiene** `risk:low` `depends:[S01]`
   > After this: the GitHub repo looks like a professional OSS project — README with badges and install instructions, MIT license, contributing guide, code of conduct, security policy, issue/PR templates, FUNDING.yml, repo topics/description, and branch protection rules.
-- [ ] **S04: CLI Auto-Update** `risk:medium` `depends:[S01]`
+- [x] **S04: CLI Auto-Update** `risk:medium` `depends:[S01]`
   > After this: a user with `autoUpdate: true` in `.driftless.json` runs `driftless init` and the CLI silently checks npm for a newer version, detects the package manager that installed it, and auto-updates before running. Network failures skip silently. npx users get a version notification instead of auto-update. Major version jumps warn but still update.
 
 ## Boundary Map

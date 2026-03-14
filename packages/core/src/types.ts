@@ -1,4 +1,9 @@
 /**
+ * Supported package managers for auto-update and global install.
+ */
+export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
+
+/**
  * Supported documentation framework targets.
  * Determines output format and structure during generation.
  */
@@ -50,6 +55,10 @@ export interface DriftlessConfig {
   agentHarness: "claude-code";
   /** How test files map to generated docs (default: "per-file") */
   docGrouping?: DocGrouping;
+  /** Whether the CLI should auto-update on launch when a newer version is available */
+  autoUpdate?: boolean;
+  /** Package manager to use for global install commands (auto-detected if omitted) */
+  packageManager?: PackageManager;
 }
 
 /**

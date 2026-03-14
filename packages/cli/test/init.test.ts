@@ -98,6 +98,8 @@ describe("gatherConfig", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGroup.mockResolvedValue(defaultGroupResult);
+    mockConfirm.mockResolvedValue(true);
+    mockIsCancel.mockReturnValue(false);
   });
 
   it("produces correct DriftlessConfig from prompt responses", async () => {
@@ -111,6 +113,7 @@ describe("gatherConfig", () => {
       skillsDir: ".skills",
       testFramework: "playwright",
       agentHarness: "claude-code",
+      autoUpdate: true,
     });
   });
 
@@ -137,6 +140,8 @@ describe("initCommand", () => {
     mockGroup.mockResolvedValue(defaultGroupResult);
     mockConfigExists.mockResolvedValue(false);
     mockIsCancel.mockReturnValue(false);
+    // Default: auto-update confirm returns true (for gatherConfig's prompt)
+    mockConfirm.mockResolvedValue(true);
     mockGenerateDocs.mockResolvedValue({
       filesGenerated: 2,
       filesErrored: 0,
@@ -206,10 +211,12 @@ describe("initCommand", () => {
 
   it("prompts for overwrite when config exists", async () => {
     mockConfigExists.mockResolvedValue(true);
-    mockConfirm.mockResolvedValue(true);
+    // First confirm: auto-update (from gatherConfig), second: overwrite (from initCommand)
+    mockConfirm.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
 
     await initCommand(makeOptions());
 
+    // Second confirm call is the overwrite prompt
     expect(mockConfirm).toHaveBeenCalledWith(
       expect.objectContaining({
         message: expect.stringContaining("Overwrite"),
@@ -222,7 +229,8 @@ describe("initCommand", () => {
 
   it("exits when user declines overwrite", async () => {
     mockConfigExists.mockResolvedValue(true);
-    mockConfirm.mockResolvedValue(false);
+    // First confirm: auto-update (true), second: overwrite (false)
+    mockConfirm.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
     const exitError = new Error("process.exit");
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => {
@@ -237,8 +245,9 @@ describe("initCommand", () => {
 
   it("exits when user cancels overwrite prompt", async () => {
     mockConfigExists.mockResolvedValue(true);
-    mockIsCancel.mockReturnValue(true);
-    mockConfirm.mockResolvedValue(Symbol("cancel"));
+    // First confirm: auto-update (true), second: overwrite (cancel)
+    mockConfirm.mockResolvedValueOnce(true).mockResolvedValueOnce(Symbol("cancel"));
+    mockIsCancel.mockImplementation((value) => typeof value === "symbol");
 
     const exitError = new Error("process.exit");
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => {
@@ -722,6 +731,66 @@ describe("initCommand", () => {
       const workflowPath = join(tmpDir, ".github", "workflows", "driftless-doc-update.yml");
       expect(await pathExists(workflowPath)).toBe(true);
       expect(await pathExists(join(tmpDir, ".github", "workflows"))).toBe(true);
+    });
+  });
+
+  // --- Auto-update prompt tests ---
+
+  describe("auto-update prompt", () => {
+    it("gatherConfig includes autoUpdate: true when user confirms", async () => {
+      mockConfirm.mockResolvedValue(true);
+      const config = await gatherConfig({ detectedFramework: "playwright" });
+      expect(config.autoUpdate).toBe(true);
+    });
+
+    it("gatherConfig includes autoUpdate: false when user declines", async () => {
+      mockConfirm.mockResolvedValue(false);
+      const config = await gatherConfig({ detectedFramework: "playwright" });
+      expect(config.autoUpdate).toBe(false);
+    });
+
+    it("gatherConfig exits on cancel of auto-update prompt", async () => {
+      mockConfirm.mockResolvedValue(Symbol("cancel"));
+      mockIsCancel.mockImplementation((value) => typeof value === "symbol");
+
+      const exitError = new Error("process.exit");
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => {
+        throw exitError;
+      });
+
+      await expect(gatherConfig({})).rejects.toThrow("process.exit");
+      expect(exitSpy).toHaveBeenCalledWith(0);
+      exitSpy.mockRestore();
+    });
+
+    it("autoUpdate field is persisted in .driftless.json", async () => {
+      mockConfirm.mockResolvedValue(true);
+      await initCommand(makeOptions());
+
+      const cfgPath = join(tmpDir, ".driftless.json");
+      const written = JSON.parse(await readFile(cfgPath, "utf-8"));
+      expect(written.autoUpdate).toBe(true);
+    });
+
+    it("autoUpdate: false is persisted when user declines", async () => {
+      mockConfirm.mockResolvedValue(false);
+      // configExists returns false, so there's no overwrite prompt — only the auto-update confirm
+      mockConfigExists.mockResolvedValue(false);
+      await initCommand(makeOptions());
+
+      const cfgPath = join(tmpDir, ".driftless.json");
+      const written = JSON.parse(await readFile(cfgPath, "utf-8"));
+      expect(written.autoUpdate).toBe(false);
+    });
+
+    it("confirm prompt asks about auto-update", async () => {
+      await initCommand(makeOptions());
+
+      expect(mockConfirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining("Auto-update"),
+        }),
+      );
     });
   });
 });

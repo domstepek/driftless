@@ -354,13 +354,13 @@ Guidelines:
 ### R036 — CLI auto-update
 
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: CLI checks npm registry for newer versions on launch when `autoUpdate: true` in `.driftless.json`, detects installed package manager, and auto-updates. Network failures skip silently. npx users get version notification instead of auto-update. Major version jumps warn but still update.
 - Why it matters: Users stay current without manual intervention — reduces support burden and ensures docs are generated with latest adapters
 - Source: user
 - Primary owning slice: M003/S04
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M003/S04 — checkForUpdate() with 5s timeout and structured return, performUpdate() orchestration (CI skip, npx notify, major warn, install, permission hint), detectPackageManager() with fallback chain, pre-command CLI hook with dynamic import, init wizard prompt. 46 new tests covering all branches. 268 total tests pass.
 - Notes: Adds `autoUpdate` and `packageManager` fields to DriftlessConfig
 
 ## Deferred
@@ -490,11 +490,11 @@ Guidelines:
 | R033 | constraint         | validated    | M001/S01      | none               | M001/S01 |
 | R034 | constraint         | validated    | M001/S01      | none               | M001/S01 |
 | R035 | quality-attribute  | validated    | M001/S01      | none               | M001/S01 |
-| R036 | quality-attribute  | active       | M003/S04      | none               | unmapped |
+| R036 | quality-attribute  | validated    | M003/S04      | none               | M003/S04 |
 
 ## Coverage Summary
 
-- Active requirements: 6
-- Mapped to slices: 6
-- Validated: 23
+- Active requirements: 5
+- Mapped to slices: 5
+- Validated: 24
 - Unmapped active requirements: 0
