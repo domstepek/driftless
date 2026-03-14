@@ -1,143 +1,182 @@
-# M005: Business Infrastructure + Monetization — Context
+# M005: Business Infrastructure + Platform Vision — Context
 
 **Gathered:** 2026-03-14
 **Status:** Queued — pending auto-mode execution
 
 ## Project Description
 
-M005 establishes driftless as a real, operating business with a monetization layer. This means forming the legal entity (Driftless LLC, New York), standing up payment infrastructure (Lemon Squeezy as Merchant of Record), implementing a license key gate on the GitHub Action (the paid capability), and adding a pricing page to the landing site. The output of this milestone includes both the technical implementation AND a comprehensive business plan written to `~/Desktop/driftless/` — detailed enough to start executing the business setup on day one.
+M005 establishes driftless as a real operating business and documents the full product vision — from free OSS CLI to a closed-source Pro tier platform. This milestone produces: (1) the legal entity (Driftless LLC, New York), (2) a comprehensive set of business planning documents written to `~/Desktop/driftless/`, and (3) the payment infrastructure foundation for when the Pro tier ships.
+
+**This is a documentation and business setup milestone, not a code milestone.** The Pro tier features (knowledge base, guided walkthroughs, auto-generated videos, autonomous dev pipeline) are built in M006+. M005 documents the full vision, ICP, competitive landscape, pricing model, and phased execution plan so the founder has complete clarity and can share the vision with collaborators/advisors.
 
 ## Why This Milestone
 
-M001–M003 build and ship the tool. M004 launches it. M005 makes it a business. Without this, driftless generates no revenue, the GitHub Action (the core ongoing value that teams pay for) is free to everyone, and there is no legal or financial infrastructure to receive, track, or report income. This milestone should be executed after M004 so the pricing page exists at the moment the product is publicly visible.
+M001–M004 build, ship, and launch the OSS tool. M005 answers: "what is this becoming, and how does it make money?" The output is a complete business planning library — thorough enough to guide execution for the next 18–24 months, share with potential co-founders or first hires, and serve as the foundation for a pitch deck if/when fundraising makes sense.
 
-**Business goal:** Lifestyle / side income. Low overhead, self-serve, no employees, runs on autopilot. Target: $5k MRR.
+**Growth model:** Bootstrapped, phased.
+- **Phase 1** (M001–M004): Ship OSS CLI, get users, GitHub Sponsors for early revenue
+- **Phase 2** (M006–M008): Build Pro tier features (a)–(c) in a separate private codebase with 1 additional dev, funded by sponsors + own money
+- **Phase 3** (M009+): Feature (d) — autonomous development pipeline — when platform has traction and revenue
 
-## Monetization Model (Research-Backed Decision)
+## Product Vision Summary
 
-**Model: Open-core + license-gated GitHub Action**
+driftless evolves from a free CLI that generates docs from e2e tests into a **product intelligence platform** for B2B SaaS companies. The OSS CLI is the top of the funnel. The closed-source Pro tier is where revenue comes from.
 
-- **Free forever:** OSS CLI (`npx driftless init`), local doc generation, skill installer, GitHub Action for public repos and solo developers (≤1 seat / public repo only)
-- **Pro ($49/org/month or $39/month billed annually):** GitHub Action on private repos, unlimited team seats within an org, advanced skill templates, priority support via GitHub Discussions
+### Free tier (OSS — MIT license, `domstepek/driftless`)
+- `npx driftless init` — interactive setup, doc generation, skill installer
+- GitHub Action for public repos / solo devs
+- All current M001–M004 functionality
 
-**Why this model:**
-- driftless uses a "bring your own Claude" architecture — no inference cost to us, no usage-based billing needed
-- The GitHub Action is the recurring value (runs on every PR forever). Once teams adopt it, they stay.
-- License key validation requires ~zero infrastructure: one Vercel serverless function + Lemon Squeezy's license key API
-- Free tier drives OSS adoption; teams hit the private-repo gate naturally and upgrade
-- Lemon Squeezy acts as Merchant of Record: handles global VAT/GST, chargebacks, fraud — zero tax compliance burden on the founder
+### Pro tier (closed-source — separate private repo, commercial license)
 
-**Pricing rationale:**
-- $49/org/month is below the per-seat cost of comparable tools (Cursor $20/user, GitHub Copilot $19/user, Linear $8-12/user)
-- For a 5-person team: $9.80/user/month — extremely competitive for ongoing automation
-- Annual discount ($39/month) encourages upfront commitment and improves cash flow predictability
-- 1% OSS-to-paid conversion rate × 5,000 active users = 50 paying orgs = $2,450 MRR; 10,000 users = $4,900 MRR
+> **Full feature specifications live outside this repo:** `~/Desktop/driftless/pro-tier-features.md`
+> That file contains the complete descriptions, differentiators, target users, and pipeline details for all four features.
 
-**What is NOT the paid tier:**
-- Not a cloud dashboard (requires infrastructure, ongoing ops)
-- Not a managed hosted service (inference cost exposure)
-- Not per-seat pricing (billing complexity without benefit at this scale)
-- Enterprise / SSO / audit logs: out of scope until actual enterprise customers ask for it
+**Feature (a): Knowledge Base + Agent Skill** — Auto-upload training materials to managed KB + agent skill for chatbot/agent integration
+**Feature (b): AI-Generated Guided Walkthroughs** — Dynamic in-app walkthroughs generated from training docs (vs manual Pendo/WalkMe authoring)
+**Feature (c): Automated Product Demo/Tutorial Videos** — Programmatic video generation from training docs via Replit Animation or similar
+**Feature (d): Autonomous Feature Request → Development Pipeline** — Widget detects unmet user needs → collects requests → demand analysis → auto-ticket → cloud agent develops → auto-PR → auto-docs/tests → preview link → guided walkthrough. Phase 3 moonshot.
+
+## ICP — Ideal Customer Profile
+
+**Primary ICP (Pro tier features a–c):**
+- **Company type:** B2B SaaS, product-led growth motion
+- **Company size:** 50–500 employees (mid-market)
+- **Engineering team:** 10–50 engineers, writes e2e tests, ships frequently
+- **Must already have:** e2e test suite, customer-facing product, docs or onboarding gap
+- **Likely also have:** AI chatbot/agent (or building one), Jira/Linear for project management
+- **Budget authority:** Engineering manager or VP Eng, $200–$1,000/month discretionary
+- **Industries:** DevTools, FinTech, HealthTech, EdTech — any B2B SaaS with complex product surface
+- **Pain point:** Documentation is always stale, onboarding is manual and expensive, product demos require constant re-recording
+
+**Why mid-market, not enterprise:**
+- Enterprise sales cycles are 6–12 months, require SOC2/SSO/audit logs, need a sales team
+- Solo founder (growing to 2) can't service enterprise accounts in Phase 2
+- Mid-market buys self-serve, decides in weeks, budgets at team level
+
+**Why not individuals/small teams:**
+- Features (a)–(c) solve org-level problems (knowledge management, user onboarding, video generation)
+- Too small a budget to sustain a product company
+- The free OSS tier already serves individuals
+
+## Competitive Landscape
+
+| Feature | Key Competitors | Market Size (2024) | Driftless Differentiation |
+|---|---|---|---|
+| (a) Knowledge base + agent skill | Guru, Tettra, Notion AI, Slite | ~$1.6B | Auto-generated from e2e tests, not manually maintained. Always current. |
+| (b) AI-guided walkthroughs | Pendo ($2B+), WalkMe (acq. SAP), Appcues, Whatfix, Userpilot | ~$2.5B (DAP) | Dynamically generated from training docs. No manual step authoring. |
+| (c) Auto demo videos | Replit Animation, Synthesia, Arcade, HeyGen | Emerging | Videos derived from real product behavior via test-generated docs. |
+| (d) Autonomous dev pipeline | Nobody (yet) | N/A | First-mover if built after platform credibility established. |
+
+**The wedge:** Every competitor in (a)–(c) relies on manually authored content. Driftless's unique advantage is the automated pipeline: e2e tests → training docs → knowledge base → walkthroughs → videos. The content is always current because it's generated from tests, which are always current. This is the positioning in every document.
 
 ## User-Visible Outcome
 
 ### When this milestone is complete:
 
-- The founder has a formed Driftless LLC in New York with an EIN and a Mercury business bank account
-- `~/Desktop/driftless/` contains a comprehensive, actionable business plan covering: LLC setup, pricing strategy, payment infrastructure setup, GTM plan, and operations playbook — with Mermaid diagrams
-- `driftless.dev/pricing` (or a section on the landing page) shows the Free and Pro tiers with a Lemon Squeezy checkout link
-- The GitHub Action (from M002) checks for a valid Lemon Squeezy license key for private repo usage; public repos and solo devs are never gated
-- Lemon Squeezy is configured: product, two subscription variants (monthly/annual), license key generation, webhook to the validation endpoint
-- A Vercel serverless function validates license keys and is called by the GitHub Action before running
+- **Driftless LLC** is formed in New York with an EIN and a Mercury business bank account (or the step-by-step guide is documented with all links/forms for immediate execution)
+- **`~/Desktop/driftless/`** contains 10 comprehensive business planning documents with Mermaid diagrams:
+  - `00-vision-strategy.md` — full vision from OSS CLI to AI product platform, phased execution
+  - `01-executive-summary.md` — one-page summary for sharing with collaborators/advisors
+  - `02-business-structure.md` — NY LLC formation, EIN, Mercury bank, accounting — step-by-step with costs
+  - `03-product-strategy.md` — ICP, competitive landscape, market sizing, positioning, phased roadmap
+  - `04-product-requirements.md` — PRD covering features (a)–(d) at varying detail (detailed for a/b, directional for c/d)
+  - `05-pricing-model.md` — free OSS + Pro tier pricing, competitor benchmarks, revenue projections
+  - `06-payment-infrastructure.md` — Stripe/Lemon Squeezy SaaS billing setup
+  - `07-gtm-plan.md` — realistic phased GTM from OSS adoption to Pro conversion
+  - `08-operations-playbook.md` — lean ops for bootstrapped phase, scaling plan
+  - `09-pitch-deck-outline.md` — slide-by-slide structure ready to build when needed
+- **Payment infrastructure** is configured (Stripe or Lemon Squeezy account, product/price objects) ready for when Pro tier ships in M006
+- **Private repo** for Pro tier codebase is created (empty scaffold) with commercial license
 
 ### Entry point / environment
 
-- Entry point: `driftless.dev/pricing` (Lemon Squeezy hosted checkout) for new customers; GitHub Action config for license key input
-- Environment: Vercel (license validation API), Lemon Squeezy (billing portal), GitHub Actions (license check)
-- Live dependencies involved: Lemon Squeezy API, Vercel serverless, GitHub Actions runner
+- Entry point: `~/Desktop/driftless/*.md` (documents), Stripe dashboard (payment config), GitHub (private repo)
+- Environment: local filesystem, Stripe/Lemon Squeezy dashboard, GitHub
+- Live dependencies involved: Stripe or Lemon Squeezy (account setup), Mercury (banking), NY Dept of State (LLC)
 
 ## Completion Class
 
-- Contract complete means: business plan docs written to `~/Desktop/driftless/`, LLC formation steps documented with all forms/links, Lemon Squeezy product configured, validation API deployed
-- Integration complete means: GitHub Action checks license key, Lemon Squeezy webhook updates license status on subscription changes (activate/deactivate)
-- Operational complete means: a test purchase flows end-to-end (checkout → license key → GitHub Action validates → access granted); a cancelled subscription revokes access
+- Contract complete means: all 10 business documents written with Mermaid diagrams, LLC formation guide has all links/costs/forms, private repo scaffolded
+- Integration complete means: documents cross-reference each other and align on ICP/pricing/phasing; payment provider account exists with product configured
+- Operational complete means: a founder reading the documents can start executing business formation and payment setup on the same day without additional research
 
 ## Final Integrated Acceptance
 
 To call this milestone complete, we must prove:
 
-- Business plan documents exist at `~/Desktop/driftless/` covering all five areas (business structure, pricing, payment infra, GTM, operations) with Mermaid diagrams and are detailed enough to execute without additional research
-- A real Lemon Squeezy test checkout produces a license key, the GitHub Action validation endpoint accepts it, and a test PR action completes successfully on a private repo
-- Cancelling the Lemon Squeezy subscription deactivates the license key and the GitHub Action denies access on the next run
-- The pricing page is live on the driftless landing site with working checkout links
+- All 10 business documents exist at `~/Desktop/driftless/` with Mermaid diagrams and are internally consistent
+- The vision document clearly articulates the phased evolution from OSS CLI → Pro platform → autonomous pipeline
+- The PRD covers all four features with enough detail to begin M006 planning without additional research on features (a) and (b)
+- Pricing model includes competitor benchmarks, revenue projections for three scenarios (conservative/moderate/aggressive), and justification
+- The LLC formation guide is actionable today — every step has a direct link, exact cost, and expected timeline
+- Private repo exists on GitHub with a README explaining its relationship to the OSS repo
 
 ## Risks and Unknowns
 
-- **NY LLC publication requirement** — New York requires new LLCs to publish formation notices in two newspapers for six consecutive weeks. Cost can run $300–$1,600 depending on county. Using a registered agent with an Albany county address reduces this to ~$150–$200. The business plan docs must include a concrete strategy for minimizing this cost.
-- **Lemon Squeezy stability** — Acquired by Stripe in July 2024; operates independently but long-term direction uncertain. Paddle is the fallback. The validation endpoint should abstract the payment provider so switching is a config change, not an architectural change.
-- **GitHub Action license check UX** — If the license check fails (invalid key, network timeout, expired), the Action must fail gracefully with a clear message pointing to the upgrade URL. A bad failure UX loses customers.
-- **License key distribution** — After a Lemon Squeezy purchase, the license key must reach the user in a way they can put it into their GitHub repo secrets. This is a UX flow that needs designing.
+- **NY LLC publication requirement** — $300–$1,600 depending on county. Using a registered agent with an Albany county address reduces to ~$150–$200. The business structure doc must include a concrete strategy.
+- **Pro tier pricing without a product** — pricing models in the documents are informed estimates based on competitor analysis and ICP research. They'll be validated/adjusted when features (a)–(c) actually ship.
+- **Replit Animation viability for feature (c)** — Replit Animation generates React-based programmatic animations, not traditional video. May need to evaluate alternatives (Synthesia, custom React renderer) during M008 planning.
+- **Feature (d) feasibility** — autonomous dev pipeline is speculative. Document the vision clearly but flag technical unknowns. This is Phase 3 for a reason.
+- **Separate codebase complexity** — two repos (OSS + Pro) means coordinating releases, shared types, and API contracts. The architecture decision must be documented in DECISIONS.md.
 
 ## Existing Prior Art / Dependencies
 
-- M002 deliverables: GitHub Action (`packages/action`) — the license gate is added here
-- M004 deliverables: Vercel landing page — pricing page is added here
-- Lemon Squeezy: `https://lemonsqueezy.com` — payment processor, MoR, license key management
-- Mercury: `https://mercury.com` — business banking
-- New York Department of State: `https://www.dos.ny.gov` — LLC formation
+- M001–M004 deliverables: the complete OSS tool, GitHub Action, landing page, docs site
+- M003: GitHub Sponsors setup (Phase 1 revenue)
+- M004: Landing page and docs site (the public face that Pro tier links back to)
+- ICP research from this discussion phase (B2B SaaS, 50–500 employees, product-led growth)
+- Competitive landscape research from this discussion phase
 
 > See `.gsd/DECISIONS.md` for all architectural and pattern decisions — it is an append-only register; read it during planning, append to it during execution.
 
 ## Relevant Requirements
 
-- R026 (new) — Business entity and legal structure for commercial operation
-- R027 (new) — Payment infrastructure for Pro tier subscriptions
-- R028 (new) — License key gate on GitHub Action for private repos / team use
+- R026 — Business entity formation (Driftless LLC, New York)
+- R027 — Payment infrastructure for future Pro tier subscriptions
+- R029 (new) — Comprehensive business planning documents at ~/Desktop/driftless/
+- R030 (new) — Private codebase scaffold for closed-source Pro tier
+- R031 (new) — Pitch deck outline and executive summary for collaborator/advisor sharing
 
 ## Scope
 
 ### In Scope
 
-- **Business plan documents** (`~/Desktop/driftless/*.md`) — comprehensive, Mermaid-diagrammed, immediately actionable:
-  - `00-overview.md` — strategy summary and decision map
-  - `01-business-structure.md` — NY LLC formation, EIN, Mercury bank, accounting setup
-  - `02-pricing-model.md` — tier definitions, pricing rationale, competitor analysis, revenue projections
-  - `03-payment-infrastructure.md` — Lemon Squeezy setup, license key architecture, Vercel validation endpoint
-  - `04-gtm-plan.md` — realistic OSS-to-paid funnel, channels, conversion tactics
-  - `05-operations-playbook.md` — recurring tasks, support process, monitoring, taxes
-- **License validation API** — Vercel serverless function that validates Lemon Squeezy license keys
-- **GitHub Action license gate** — adds license check to the M002 Action for private repo / team usage
-- **Lemon Squeezy configuration** — product setup, Free and Pro variants, license key generation, webhook to validation endpoint
-- **Pricing page** — section on driftless.dev landing page with tier comparison and Lemon Squeezy checkout links
-- **NY LLC formation guide** (in business plan docs) — step-by-step with links, costs, and the Albany county trick
+- **10 business planning documents** to `~/Desktop/driftless/` with Mermaid diagrams (see User-Visible Outcome for full list)
+- **NY LLC formation guide** — step-by-step, all links, costs, timeline
+- **Payment provider setup** — Stripe or Lemon Squeezy account with product/price configuration
+- **Private repo scaffold** — GitHub private repo for Pro tier with README, license, and basic project structure
+- **Architecture decision** — how OSS and Pro repos share types/contracts (documented in DECISIONS.md)
+- **ICP analysis** — embedded in product strategy doc with supporting research
+- **Competitive landscape** — embedded in product strategy doc with feature-by-feature comparison
 
 ### Out of Scope / Non-Goals
 
-- Forming the LLC itself (this is a human task documented in the plan)
-- Enterprise tier (SSO, audit logs, custom contracts) — defer until actual enterprise demand
-- Usage-based billing — architecture doesn't support it without server-side tracking
-- Customer success or sales outreach — self-serve only
-- Billing for the OSS CLI itself — free forever
-- Support beyond GitHub Discussions and email
+- **Building any Pro tier features** — that's M006+ (knowledge base, walkthroughs, videos, autonomous pipeline)
+- **Forming the LLC** — human task, documented in the guide
+- **Detailed technical architecture for features (a)–(d)** — the PRD covers product requirements, not system design
+- **Investor outreach or fundraising** — the pitch deck outline is for readiness, not active fundraising
+- **Enterprise tier planning** — defer until mid-market traction is proven
+- ~~License gate on GitHub Action~~ — removed; the old model was replaced by the closed-source Pro tier approach
 
 ## Technical Constraints
 
-- **Lemon Squeezy as MoR:** Handles VAT/GST/sales tax globally. Founder never files international tax. Non-negotiable for low-overhead ops.
-- **Vercel serverless for license API:** Must be stateless, fast, and cold-start tolerant. The GitHub Action can't wait 10s for a function to warm up.
-- **License key in GitHub secrets:** Users add `DRIFTLESS_LICENSE_KEY` as a GitHub Actions secret. The Action reads it at runtime. No hardcoded keys in workflow YAML.
-- **Graceful degradation:** If the license validation endpoint is unreachable (Vercel outage, network timeout), the Action should warn but NOT block — fail open, not closed. Log the warning; don't break CI.
-- **Depends on M002:** The GitHub Action must exist before we can gate it. Depends on M004 for the pricing page.
+- **Lemon Squeezy or Stripe** for payment processing — decision made during M005 execution based on latest pricing/features
+- **GitHub private repo** for Pro tier — must be under the same GitHub org or user account
+- **Commercial license** for Pro tier — BSL (Business Source License) or proprietary; decided during M005 and documented
+- **Documents must be Mermaid-compatible** — all diagrams use Mermaid syntax for portability
 
 ## Integration Points
 
-- **Lemon Squeezy** — billing, subscription management, license key lifecycle, customer portal (self-serve upgrades/cancellations)
-- **Vercel** — hosts the license validation serverless function alongside the landing page
-- **GitHub Actions** — the `packages/action` package checks `DRIFTLESS_LICENSE_KEY` env var against the validation endpoint
-- **Mercury** — business bank account receives Lemon Squeezy payouts (weekly)
-- **Wave (or simple spreadsheet)** — bookkeeping for the NY LLC annual filing fee and quarterly estimated taxes
+- **GitHub** — private repo creation, org settings
+- **Stripe or Lemon Squeezy** — payment provider account and product setup
+- **Mercury** — business bank account (receives payouts)
+- **NY Department of State** — LLC formation (documented, not executed by agent)
+- **M004 landing page** — Pro tier will eventually link from pricing page (M006+ adds the page)
 
 ## Open Questions
 
-- Exact Lemon Squeezy license key validation API shape — need to verify during S02 research whether to use their hosted `/v1/licenses/validate` endpoint or replicate key status via webhook into our own store. Current thinking: call Lemon Squeezy directly from the validation endpoint (simpler, no our-side database).
-- What happens to existing free users of the GitHub Action when the gate is added? Current thinking: grandfather in all repos that had the Action configured before the gate was introduced — add a `grandfathered: true` bypass for 30 days with a migration notice.
-- Should annual billing be offered from day one or added after validating monthly demand? Current thinking: offer both from launch, annual is just a Lemon Squeezy variant on the same product.
+- **Stripe vs Lemon Squeezy for SaaS billing?** Lemon Squeezy is simpler (MoR, handles tax) but Stripe gives more control. For bootstrapped phase, Lemon Squeezy is probably better. Decision during M005 execution.
+- **BSL vs proprietary for Pro tier license?** BSL allows source visibility but restricts commercial use; proprietary is simpler but less transparent. Need to decide based on competitive positioning.
+- **Mono-org or separate org for private repo?** Keeping both repos under `domstepek` is simplest. Separate org (`driftless-pro` or similar) is cleaner for team access later.
+- **How do OSS and Pro repos share types?** Options: npm package of shared types, git submodule, or copy-paste with CI sync check. Decision during M006 planning.

@@ -96,6 +96,8 @@ export interface GenerateResult {
   errors: GenerateFileError[];
   /** Per-file agent results (in processing order) */
   results: Array<{ file: string; result: AgentResult }>;
+  /** Absolute paths of doc files successfully written during this run */
+  filesWritten: string[];
 }
 
 /**

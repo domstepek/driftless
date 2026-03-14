@@ -1,5 +1,8 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { DriftlessConfig, InitOptions } from "@driftless/core";
+import { mkdtemp, readFile, rm, stat, writeFile as fsWriteFile, mkdir } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import type { DriftlessConfig, GenerateResult, InitOptions } from "@driftless/core";
 
 // Mock @clack/prompts
 const mockSpinner = {
@@ -27,13 +30,12 @@ vi.mock("@clack/prompts", () => ({
   cancel: vi.fn(),
 }));
 
-// Mock @driftless/core
+// Mock @driftless/core — spread actual to keep FileTransaction, DebugLogger, configPath real
 vi.mock("@driftless/core", async () => {
   const actual = await vi.importActual<typeof import("@driftless/core")>("@driftless/core");
   return {
     ...actual,
     detectTestFramework: vi.fn(),
-    writeConfig: vi.fn().mockResolvedValue(undefined),
     configExists: vi.fn().mockResolvedValue(false),
     generateDocs: vi.fn().mockResolvedValue({
       filesGenerated: 2,
@@ -41,6 +43,7 @@ vi.mock("@driftless/core", async () => {
       totalCostUsd: 0.05,
       errors: [],
       results: [],
+      filesWritten: [],
     }),
     installSkills: vi.fn().mockResolvedValue({
       installed: ["doc-generator", "e2e-writer"],
@@ -50,20 +53,12 @@ vi.mock("@driftless/core", async () => {
 });
 
 import * as p from "@clack/prompts";
-import {
-  detectTestFramework,
-  writeConfig,
-  configExists,
-  generateDocs,
-  installSkills,
-} from "@driftless/core";
-import type { GenerateResult } from "@driftless/core";
+import { detectTestFramework, configExists, generateDocs, installSkills } from "@driftless/core";
 import { gatherConfig } from "../src/prompts/init-prompts.js";
 import { initCommand } from "../src/commands/init.js";
 
 const mockGroup = vi.mocked(p.group);
 const mockDetect = vi.mocked(detectTestFramework);
-const mockWriteConfig = vi.mocked(writeConfig);
 const mockConfigExists = vi.mocked(configExists);
 const mockConfirm = vi.mocked(p.confirm);
 const mockIsCancel = vi.mocked(p.isCancel);
@@ -78,13 +73,13 @@ const defaultGroupResult = {
   skillsDir: ".skills",
 };
 
-function makeOptions(overrides: Partial<InitOptions> = {}): InitOptions {
-  return {
-    dryRun: false,
-    verbose: false,
-    cwd: "/tmp/test-project",
-    ...overrides,
-  };
+async function pathExists(p: string): Promise<boolean> {
+  try {
+    await stat(p);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 describe("gatherConfig", () => {
@@ -121,18 +116,22 @@ describe("gatherConfig", () => {
 });
 
 describe("initCommand", () => {
-  beforeEach(() => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
     vi.clearAllMocks();
+    tmpDir = await mkdtemp(resolve(tmpdir(), "driftless-init-"));
     mockDetect.mockResolvedValue("playwright");
     mockGroup.mockResolvedValue(defaultGroupResult);
     mockConfigExists.mockResolvedValue(false);
-    mockWriteConfig.mockResolvedValue(undefined);
+    mockIsCancel.mockReturnValue(false);
     mockGenerateDocs.mockResolvedValue({
       filesGenerated: 2,
       filesErrored: 0,
       totalCostUsd: 0.05,
       errors: [],
       results: [],
+      filesWritten: [],
     });
     mockInstallSkills.mockResolvedValue({
       installed: ["doc-generator", "e2e-writer"],
@@ -140,7 +139,20 @@ describe("initCommand", () => {
     });
   });
 
-  it("calls detect → gather → write in order", async () => {
+  afterEach(async () => {
+    await rm(tmpDir, { recursive: true, force: true });
+  });
+
+  function makeOptions(overrides: Partial<InitOptions> = {}): InitOptions {
+    return {
+      dryRun: false,
+      verbose: false,
+      cwd: tmpDir,
+      ...overrides,
+    };
+  }
+
+  it("calls detect → gather in order and writes config", async () => {
     const callOrder: string[] = [];
     mockDetect.mockImplementation(async () => {
       callOrder.push("detect");
@@ -150,15 +162,18 @@ describe("initCommand", () => {
       callOrder.push("gather");
       return defaultGroupResult;
     });
-    mockWriteConfig.mockImplementation(async () => {
-      callOrder.push("write");
-    });
 
     await initCommand(makeOptions());
 
-    expect(callOrder).toEqual(["detect", "gather", "write"]);
+    expect(callOrder).toEqual(["detect", "gather"]);
     expect(p.intro).toHaveBeenCalledWith("driftless init");
     expect(p.outro).toHaveBeenCalled();
+
+    // Config file written via transaction
+    const cfgPath = join(tmpDir, ".driftless.json");
+    expect(await pathExists(cfgPath)).toBe(true);
+    const written = JSON.parse(await readFile(cfgPath, "utf-8"));
+    expect(written.testPaths).toEqual(["tests/**/*.spec.ts"]);
   });
 
   it("logs detection result when framework found", async () => {
@@ -184,7 +199,9 @@ describe("initCommand", () => {
         message: expect.stringContaining("Overwrite"),
       }),
     );
-    expect(mockWriteConfig).toHaveBeenCalled();
+    // Config should have been written
+    const cfgPath = join(tmpDir, ".driftless.json");
+    expect(await pathExists(cfgPath)).toBe(true);
   });
 
   it("exits when user declines overwrite", async () => {
@@ -199,7 +216,6 @@ describe("initCommand", () => {
     await expect(initCommand(makeOptions())).rejects.toThrow("process.exit");
 
     expect(exitSpy).toHaveBeenCalledWith(0);
-    expect(mockWriteConfig).not.toHaveBeenCalled();
     exitSpy.mockRestore();
   });
 
@@ -216,22 +232,191 @@ describe("initCommand", () => {
     await expect(initCommand(makeOptions())).rejects.toThrow("process.exit");
 
     expect(exitSpy).toHaveBeenCalledWith(0);
-    expect(mockWriteConfig).not.toHaveBeenCalled();
     exitSpy.mockRestore();
-  });
-
-  it("skips write in dry-run mode", async () => {
-    await initCommand(makeOptions({ dryRun: true }));
-
-    expect(mockWriteConfig).not.toHaveBeenCalled();
-    expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining("Dry run"));
-    expect(p.log.message).toHaveBeenCalled();
   });
 
   it("shows summary note after writing", async () => {
     await initCommand(makeOptions());
     expect(p.note).toHaveBeenCalledWith(expect.stringContaining("Test paths"), ".driftless.json");
   });
+
+  // --- Dry-run tests ---
+
+  describe("dry-run", () => {
+    it("does not write any files in dry-run mode", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(await pathExists(join(tmpDir, ".driftless.json"))).toBe(false);
+      expect(await pathExists(join(tmpDir, ".driftless"))).toBe(false);
+      expect(mockGenerateDocs).not.toHaveBeenCalled();
+      expect(mockInstallSkills).not.toHaveBeenCalled();
+    });
+
+    it("shows config file in preview", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+      expect(p.log.info).toHaveBeenCalledWith("Config file: .driftless.json");
+    });
+
+    it("lists matched test files in preview", async () => {
+      // Create test files matching the glob
+      const testsDir = join(tmpDir, "tests");
+      await mkdir(testsDir, { recursive: true });
+      await fsWriteFile(join(testsDir, "login.spec.ts"), "test", "utf-8");
+      await fsWriteFile(join(testsDir, "signup.spec.ts"), "test", "utf-8");
+
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.log.info).toHaveBeenCalledWith(expect.stringContaining("Test files found (2)"));
+      expect(p.log.message).toHaveBeenCalledWith(expect.stringContaining("login.spec.ts"));
+      expect(p.log.message).toHaveBeenCalledWith(expect.stringContaining("signup.spec.ts"));
+    });
+
+    it("shows planned output doc filenames", async () => {
+      const testsDir = join(tmpDir, "tests");
+      await mkdir(testsDir, { recursive: true });
+      await fsWriteFile(join(testsDir, "login.spec.ts"), "test", "utf-8");
+
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.log.info).toHaveBeenCalledWith(
+        expect.stringContaining("Docs that would be generated"),
+      );
+      expect(p.log.message).toHaveBeenCalledWith(expect.stringContaining("login.md"));
+    });
+
+    it("shows skill install paths in preview", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.log.info).toHaveBeenCalledWith(
+        expect.stringContaining("Skills that would be installed"),
+      );
+      expect(p.log.message).toHaveBeenCalledWith(expect.stringContaining("doc-generator/SKILL.md"));
+      expect(p.log.message).toHaveBeenCalledWith(expect.stringContaining("e2e-writer/SKILL.md"));
+    });
+
+    it("shows graceful message when no test files match", async () => {
+      // No test files exist in tmpDir
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.log.info).toHaveBeenCalledWith("0 test files found matching configured patterns.");
+    });
+
+    it("shows dry run note with config summary", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.note).toHaveBeenCalledWith(expect.stringContaining("Test paths"), "Dry run preview");
+      expect(p.outro).toHaveBeenCalledWith("No files were written.");
+    });
+  });
+
+  // --- Debug log tests ---
+
+  describe("debug log", () => {
+    it("writes debug log on successful run", async () => {
+      await initCommand(makeOptions());
+
+      const debugLogPath = join(tmpDir, ".driftless", "debug.log");
+      expect(await pathExists(debugLogPath)).toBe(true);
+
+      const entries = JSON.parse(await readFile(debugLogPath, "utf-8"));
+      const phases = entries.map((e: { phase: string }) => e.phase);
+      expect(phases).toContain("detect");
+      expect(phases).toContain("config");
+      expect(phases).toContain("complete");
+    });
+
+    it("writes debug log with generate entries when docs are generated", async () => {
+      mockGenerateDocs.mockResolvedValue({
+        filesGenerated: 1,
+        filesErrored: 0,
+        totalCostUsd: 0.03,
+        errors: [],
+        results: [
+          {
+            file: "tests/login.spec.ts",
+            result: {
+              content: "doc",
+              stderr: "",
+              durationMs: 500,
+              costUsd: 0.03,
+              exitCode: 0,
+              success: true,
+            },
+          },
+        ],
+        filesWritten: [join(tmpDir, "docs/training/login.md")],
+      });
+
+      await initCommand(makeOptions());
+
+      const debugLogPath = join(tmpDir, ".driftless", "debug.log");
+      const entries = JSON.parse(await readFile(debugLogPath, "utf-8"));
+      const phases = entries.map((e: { phase: string }) => e.phase);
+      expect(phases).toContain("generate");
+    });
+
+    it("writes debug log with skills entry", async () => {
+      await initCommand(makeOptions());
+
+      const debugLogPath = join(tmpDir, ".driftless", "debug.log");
+      const entries = JSON.parse(await readFile(debugLogPath, "utf-8"));
+      const phases = entries.map((e: { phase: string }) => e.phase);
+      expect(phases).toContain("skills");
+    });
+
+    it("writes debug log on failure with error entry", async () => {
+      mockGenerateDocs.mockRejectedValue(new Error("agent spawn failed"));
+
+      await expect(initCommand(makeOptions())).rejects.toThrow("agent spawn failed");
+
+      const debugLogPath = join(tmpDir, ".driftless", "debug.log");
+      expect(await pathExists(debugLogPath)).toBe(true);
+
+      const entries = JSON.parse(await readFile(debugLogPath, "utf-8"));
+      const phases = entries.map((e: { phase: string }) => e.phase);
+      expect(phases).toContain("error");
+
+      const errorEntry = entries.find((e: { phase: string }) => e.phase === "error");
+      expect(errorEntry.data.message).toBe("agent spawn failed");
+    });
+  });
+
+  // --- Rollback tests ---
+
+  describe("rollback on failure", () => {
+    it("removes created files on error but preserves debug log", async () => {
+      mockGenerateDocs.mockRejectedValue(new Error("generation blew up"));
+
+      await expect(initCommand(makeOptions())).rejects.toThrow("generation blew up");
+
+      // Config should be rolled back
+      const cfgPath = join(tmpDir, ".driftless.json");
+      expect(await pathExists(cfgPath)).toBe(false);
+
+      // Debug log should be preserved
+      const debugLogPath = join(tmpDir, ".driftless", "debug.log");
+      expect(await pathExists(debugLogPath)).toBe(true);
+    });
+
+    it("does not delete pre-existing config on rollback", async () => {
+      // Create config before init runs
+      const cfgPath = join(tmpDir, ".driftless.json");
+      await fsWriteFile(cfgPath, '{"existing": true}', "utf-8");
+
+      // configExists returns true, user confirms overwrite
+      mockConfigExists.mockResolvedValue(true);
+      mockConfirm.mockResolvedValue(true);
+      mockGenerateDocs.mockRejectedValue(new Error("generation blew up"));
+
+      await expect(initCommand(makeOptions())).rejects.toThrow("generation blew up");
+
+      // Pre-existing config should survive rollback (overwritten content stays,
+      // but file isn't deleted because it pre-existed)
+      expect(await pathExists(cfgPath)).toBe(true);
+    });
+  });
+
+  // --- Doc generation tests ---
 
   describe("doc generation", () => {
     const successResult: GenerateResult = {
@@ -240,6 +425,7 @@ describe("initCommand", () => {
       totalCostUsd: 0.12,
       errors: [],
       results: [],
+      filesWritten: [],
     };
 
     const partialResult: GenerateResult = {
@@ -251,6 +437,7 @@ describe("initCommand", () => {
         { file: "tests/b.spec.ts", error: "non-zero exit" },
       ],
       results: [],
+      filesWritten: [],
     };
 
     const allFailedResult: GenerateResult = {
@@ -263,6 +450,7 @@ describe("initCommand", () => {
         { file: "tests/c.spec.ts", error: "spawn error" },
       ],
       results: [],
+      filesWritten: [],
     };
 
     it("calls generateDocs with correct config when doc-generator in capabilities", async () => {
@@ -275,7 +463,7 @@ describe("initCommand", () => {
           capabilities: expect.arrayContaining(["doc-generator"]),
         }),
         expect.objectContaining({
-          cwd: "/tmp/test-project",
+          cwd: tmpDir,
           onProgress: expect.any(Function),
         }),
       );
@@ -299,9 +487,6 @@ describe("initCommand", () => {
       await initCommand(makeOptions({ dryRun: true }));
 
       expect(mockGenerateDocs).not.toHaveBeenCalled();
-      expect(p.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("doc generation would run but was skipped"),
-      );
     });
 
     it("shows error spinner and warnings when generation has failures", async () => {
@@ -336,35 +521,23 @@ describe("initCommand", () => {
     });
   });
 
-  describe("skill installation", () => {
-    it("calls installSkills after config write when capabilities present", async () => {
-      const callOrder: string[] = [];
-      mockWriteConfig.mockImplementation(async () => {
-        callOrder.push("write");
-      });
-      mockInstallSkills.mockImplementation(async () => {
-        callOrder.push("skills");
-        return { installed: ["doc-generator", "e2e-writer"], skillsDir: ".skills" };
-      });
+  // --- Skill installation tests ---
 
+  describe("skill installation", () => {
+    it("calls installSkills when capabilities present", async () => {
       await initCommand(makeOptions());
 
       expect(mockInstallSkills).toHaveBeenCalledOnce();
       expect(mockInstallSkills).toHaveBeenCalledWith(
         expect.objectContaining({ capabilities: expect.arrayContaining(["doc-generator"]) }),
-        expect.objectContaining({ cwd: "/tmp/test-project" }),
+        expect.objectContaining({ cwd: tmpDir }),
       );
-      // Skills install happens after config write
-      expect(callOrder.indexOf("write")).toBeLessThan(callOrder.indexOf("skills"));
     });
 
     it("skips skill installation in dry-run mode", async () => {
       await initCommand(makeOptions({ dryRun: true }));
 
       expect(mockInstallSkills).not.toHaveBeenCalled();
-      expect(p.log.info).toHaveBeenCalledWith(
-        expect.stringContaining("skills would be installed but were skipped"),
-      );
     });
 
     it("skips skill installation when capabilities array is empty", async () => {

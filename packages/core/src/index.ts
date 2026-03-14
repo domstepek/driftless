@@ -20,7 +20,12 @@ export { spawnAgent, type SpawnAgentOptions } from "./agent.js";
 
 export { docusaurusPrompt, fumadocsPrompt, getAdapterPrompt, plainMdPrompt } from "./adapters.js";
 
-export { generateDocs, type GenerateDocsOptions } from "./generator.js";
+export {
+  generateDocs,
+  type GenerateDocsOptions,
+  outputFilename,
+  resolveGlobs,
+} from "./generator.js";
 
 export {
   docGeneratorTemplate,
@@ -29,3 +34,7 @@ export {
   type InstallSkillsOptions,
   type InstallSkillsResult,
 } from "./skills.js";
+
+export { FileTransaction } from "./transaction.js";
+
+export { DebugLogger, type DebugEntry } from "./logger.js";

@@ -38,7 +38,7 @@ async function walkDir(dir: string): Promise<string[]> {
  * Resolve glob patterns to actual file paths relative to cwd.
  * Supports `**` and `*` via minimatch.
  */
-async function resolveGlobs(patterns: string[], cwd: string): Promise<string[]> {
+export async function resolveGlobs(patterns: string[], cwd: string): Promise<string[]> {
   const allFiles = await walkDir(cwd);
   const matched = new Set<string>();
 
@@ -60,7 +60,10 @@ async function resolveGlobs(patterns: string[], cwd: string): Promise<string[]> 
  * Determine the output filename for a test file based on framework.
  * Strips the test file extension and applies the doc extension.
  */
-function outputFilename(testFilePath: string, framework: DriftlessConfig["docFramework"]): string {
+export function outputFilename(
+  testFilePath: string,
+  framework: DriftlessConfig["docFramework"],
+): string {
   const stem = basename(testFilePath, extname(testFilePath));
   // Strip common test suffixes for cleaner doc names
   const cleanStem = stem.replace(/\.(spec|test|e2e|cy)$/, "").replace(/-(spec|test|e2e)$/, "");
@@ -91,6 +94,7 @@ export async function generateDocs(
     totalCostUsd: 0,
     errors: [],
     results: [],
+    filesWritten: [],
   };
 
   // Resolve test file globs
@@ -153,6 +157,7 @@ export async function generateDocs(
       await writeFile(outPath, agentResult.content, "utf-8");
 
       result.filesGenerated++;
+      result.filesWritten.push(outPath);
       onProgress?.({
         type: "complete",
         file: relFile,

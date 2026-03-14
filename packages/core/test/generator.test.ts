@@ -80,6 +80,10 @@ describe("generateDocs", () => {
     expect(result.errors).toHaveLength(0);
     expect(result.results).toHaveLength(2);
 
+    // Verify filesWritten tracks output paths
+    expect(result.filesWritten).toHaveLength(2);
+    expect(result.filesWritten.every((p) => p.startsWith(join(tmpDir, "docs")))).toBe(true);
+
     // Verify output files
     const docsDir = join(tmpDir, "docs");
     const files = await readdir(docsDir);
@@ -129,6 +133,7 @@ describe("generateDocs", () => {
     expect(result.filesErrored).toBe(0);
     expect(result.errors).toHaveLength(0);
     expect(result.results).toHaveLength(0);
+    expect(result.filesWritten).toHaveLength(0);
     expect(mockSpawnAgent).not.toHaveBeenCalled();
   });
 
@@ -226,5 +231,23 @@ describe("generateDocs", () => {
     const result = await generateDocs(config, { cwd: tmpDir });
 
     expect(result.filesGenerated).toBe(2);
+  });
+
+  it("filesWritten is empty when all files fail generation", async () => {
+    const testsDir = join(tmpDir, "tests");
+    await mkdir(testsDir, { recursive: true });
+    await writeFile(join(testsDir, "fail1.spec.ts"), "test content");
+    await writeFile(join(testsDir, "fail2.spec.ts"), "test content");
+
+    mockSpawnAgent
+      .mockResolvedValueOnce(errorResult("agent crashed"))
+      .mockResolvedValueOnce(errorResult("timeout"));
+
+    const config = makeConfig();
+    const result = await generateDocs(config, { cwd: tmpDir });
+
+    expect(result.filesGenerated).toBe(0);
+    expect(result.filesErrored).toBe(2);
+    expect(result.filesWritten).toHaveLength(0);
   });
 });

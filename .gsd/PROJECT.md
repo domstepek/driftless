@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-M001/S04 complete. Skill installer built and wired into init flow: `docGeneratorTemplate()` and `e2eWriterTemplate()` produce parameterized SKILL.md content with framework-specific callout syntax, `installSkills()` writes them to `{skillsDir}/{name}/SKILL.md` gated on capability selection. Init command calls installer after doc generation with dry-run skip. 118 tests pass across both packages. Next: S05 (Rollback, debug logging, dry-run).
+M001/S05 complete — all five slices done. Init is now fail-safe: FileTransaction wraps all write operations with automatic rollback on error, DebugLogger writes structured `.driftless/debug.log` every run, `--dry-run` previews all changes without spawning the agent. 146 tests pass across 11 test files. M001 milestone ready for audit.
 
 ## Architecture / Key Patterns
 
@@ -34,7 +34,11 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 - [ ] M002: GitHub Actions + PR Automation — Distributable actions for doc staleness detection, doc updates, and e2e test generation in user repos
 - [ ] M003: OSS Maturity + v1.0 Release — npm publish pipeline, semantic releases, CHANGELOG, CI for driftless, community files, repo hygiene
 - [ ] M004: Product Launch — Vercel landing page, fumadocs docs site, X/Twitter OSS launch playbook (output to ~/Desktop/driftless/)
-- [ ] M005: Business Infrastructure + Monetization — Driftless LLC (NY) formation, Lemon Squeezy payment infrastructure, GitHub Action license gate for Pro tier, pricing page, comprehensive business plan (output to ~/Desktop/driftless/)
+- [ ] M005: Business Infrastructure + Platform Vision — Driftless LLC (NY), business planning docs (vision/exec summary/PRD/pricing/GTM/pitch deck outline), payment infra setup, private Pro repo scaffold (output to ~/Desktop/driftless/)
+- [ ] M006: Pro Tier — Knowledge Base + Agent Skill (feature a) — auto-upload training materials to managed KB, agent skill for chatbot/agent integration
+- [ ] M007: Pro Tier — AI-Generated Guided Walkthroughs (feature b) — dynamic in-app walkthroughs generated from training docs
+- [ ] M008: Pro Tier — Automated Demo/Tutorial Videos (feature c) — programmatic video generation from training docs via Replit Animation or similar
+- [ ] M009: Pro Tier — Autonomous Feature Request → Development Pipeline (feature d) — widget detects unmet needs, clusters requests, auto-tickets, cloud agent develops, auto-PR, auto-docs, preview link
 
 ## Notes
 
@@ -42,3 +46,5 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 - **OSS skill learning:** Building `~/.gsd/agent/skills/oss-repo-setup/` incrementally as we ship — real learnings from this project, not front-loaded research.
 - **Web search:** Use `google_search` tool for all web research. Do NOT use `search-the-web` or `search_and_read`.
 - **GitHub updates:** Use the `agent-browser` skill (native mode) for any GitHub repository UI operations.
+- **Two-repo architecture:** OSS CLI stays MIT in `domstepek/driftless`. Pro tier features (a)–(d) live in a separate private repo with commercial license. Shared types/contracts TBD during M006 planning.
+- **Growth model:** Bootstrapped. Phase 1 (M001–M004) = OSS traction + GitHub Sponsors. Phase 2 (M006–M008) = Pro tier with 1 additional dev. Phase 3 (M009+) = autonomous pipeline when platform has revenue.

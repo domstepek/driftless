@@ -67,7 +67,7 @@ This milestone is complete only when all are true:
 
   > After this: CLI copies genericized skill files into the target repo's `.skills/` directory, configured for the user's doc framework and capability choices. Skills are correctly parameterized and ready for the GitHub Action (M002).
 
-- [ ] **S05: Rollback, debug logging, dry-run** `risk:low` `depends:[S02,S03,S04]`
+- [x] **S05: Rollback, debug logging, dry-run** `risk:low` `depends:[S02,S03,S04]`
   > After this: `--dry-run` previews all init changes. Failed init rolls back all filesystem changes. Every run writes a structured debug log to `.driftless/debug.log`. Init is idempotent — safe to re-run.
 
 ## Boundary Map

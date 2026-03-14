@@ -90,25 +90,25 @@ Guidelines:
 ### R007 — Debug logging for issue reporting
 
 - Class: failure-visibility
-- Status: active
+- Status: validated
 - Description: Every `driftless init` run writes a structured debug log (agent output, file operations, config choices) to `.driftless/debug.log`
 - Why it matters: When something goes wrong, users can paste the log in a GitHub issue and maintainers get full context
 - Source: user
 - Primary owning slice: M001/S05
 - Supporting slices: M001/S02, M001/S03
-- Validation: unmapped
+- Validation: M001/S05 — DebugLogger accumulates timestamped JSON entries per phase (detect, config, generate, skills, error, rollback, complete). Flush writes JSON array to `.driftless/debug.log`, creating parent dirs. Flush-never-throws pattern ensures logging can't crash init. 5 logger unit tests + debug log integration tests in init.test.ts verify both success and failure paths.
 - Notes: Log should be structured enough for issue triage
 
 ### R008 — Fail-clean with rollback on init errors
 
 - Class: failure-visibility
-- Status: active
+- Status: validated
 - Description: If init fails mid-run (agent harness not found, inference fails, file write error), all partial changes are rolled back so the repo is unchanged
 - Why it matters: Users should never be left with a half-installed broken state
 - Source: user
 - Primary owning slice: M001/S05
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M001/S05 — FileTransaction tracks all files/dirs created during init with pre-existence flags. Rollback iterates in reverse order, removing only newly-created paths, excluding debug log. 10 transaction unit tests + rollback integration tests in init.test.ts verify: forced failure removes config, pre-existing files survive, debug log preserved.
 - Notes: Init must be idempotent — safe to re-run after failure
 
 ### R009 — Config file persisting init choices
@@ -138,13 +138,13 @@ Guidelines:
 ### R011 — `--dry-run` flag
 
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: `driftless init --dry-run` previews all changes that would be made without writing any files
 - Why it matters: Users want to see what the tool will do before committing to it — table stakes for repo-modifying CLIs
 - Source: research
 - Primary owning slice: M001/S05
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M001/S05 — dry-run runs glob resolution to show test files, computes output doc filenames and skill paths, renders structured preview via p.log. No agent spawn, no file writes. Integration tests verify file listing output and zero files written to disk, including 0-file graceful case.
 - Notes: none
 
 ### R012 — GitHub Action: PR-triggered doc staleness detection + update
@@ -449,11 +449,11 @@ Guidelines:
 | R004 | core-capability    | validated    | M001/S03      | M001/S04           | M001/S03 |
 | R005 | core-capability    | validated    | M001/S04      | none               | M001/S04 |
 | R006 | quality-attribute  | validated    | M001/S03      | none               | M001/S03 |
-| R007 | failure-visibility | active       | M001/S05      | M001/S02, M001/S03 | unmapped |
-| R008 | failure-visibility | active       | M001/S05      | none               | unmapped |
+| R007 | failure-visibility | validated    | M001/S05      | M001/S02, M001/S03 | M001/S05 |
+| R008 | failure-visibility | validated    | M001/S05      | none               | M001/S05 |
 | R009 | core-capability    | validated    | M001/S02      | M001/S03, M001/S04 | M001/S02 |
 | R010 | quality-attribute  | validated    | M001/S02      | none               | M001/S02 |
-| R011 | quality-attribute  | active       | M001/S05      | none               | unmapped |
+| R011 | quality-attribute  | validated    | M001/S05      | none               | M001/S05 |
 | R012 | core-capability    | active       | M002/S01      | M002/S02           | unmapped |
 | R013 | core-capability    | active       | M002/S02      | none               | unmapped |
 | R014 | integration        | active       | M002/S01      | M002/S02           | unmapped |
@@ -483,5 +483,5 @@ Guidelines:
 
 - Active requirements: 17
 - Mapped to slices: 17
-- Validated: 12
+- Validated: 15
 - Unmapped active requirements: 0
