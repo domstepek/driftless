@@ -234,26 +234,26 @@ Guidelines:
 ### R019 — OSS community files
 
 - Class: launchability
-- Status: active
+- Status: validated
 - Description: LICENSE (MIT), CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, .github/ISSUE_TEMPLATE/, .github/PULL_REQUEST_TEMPLATE.md
 - Why it matters: Professional OSS repos have these — signals trust and invites contribution
 - Source: user
 - Primary owning slice: M003/S03
 - Supporting slices: none
-- Validation: unmapped
-- Notes: none
+- Validation: M003/S03 — all 10 files created: MIT LICENSE (bare filename), CONTRIBUTING.md with pnpm workspace dev setup, CODE_OF_CONDUCT.md (Contributor Covenant v2.1), SECURITY.md with responsible disclosure, YAML form issue templates (bug_report.yml, feature_request.yml), config.yml disabling blank issues, PR template, FUNDING.yml. File existence and content verified via ls + grep checks.
+- Notes: Contact email placeholders in CoC and SECURITY need replacement before public launch
 
 ### R020 — GitHub repo hygiene
 
 - Class: launchability
-- Status: active
+- Status: validated
 - Description: Topics, description, social preview, branch protection rules configured on the GitHub repo
 - Why it matters: Discoverability and professionalism — first impression for potential users/contributors
 - Source: user
 - Primary owning slice: M003/S03
 - Supporting slices: none
-- Validation: unmapped
-- Notes: Use agent-browser native skill for GitHub UI operations
+- Validation: M003/S03 — 9 topics set (cli, documentation, testing, e2e-testing, developer-tools, claude, ai, typescript, open-source), homepage URL set to npm package page, classic branch protection on main requiring 1 PR approval + "Test & Build" status check + up-to-date branches. Configured via browser automation; confirmed via screenshots.
+- Notes: Used agent-browser for GitHub UI operations (fine-grained PAT returns 403 on branch protection APIs)
 
 ### R021 — Vercel landing/marketing page
 
@@ -473,8 +473,8 @@ Guidelines:
 | R016 | launchability      | validated    | M003/S01      | none               | M003/S01 |
 | R017 | launchability      | validated    | M003/S01      | none               | M003/S01 |
 | R018 | operability        | validated    | M003/S02      | none               | M003/S02 |
-| R019 | launchability      | active       | M003/S03      | none               | unmapped |
-| R020 | launchability      | active       | M003/S03      | none               | unmapped |
+| R019 | launchability      | validated    | M003/S03      | none               | M003/S03 |
+| R020 | launchability      | validated    | M003/S03      | none               | M003/S03 |
 | R021 | launchability      | active       | M004/S01      | none               | unmapped |
 | R022 | launchability      | active       | M004/S02      | none               | unmapped |
 | R023 | launchability      | active       | M004/S03      | none               | unmapped |
@@ -494,7 +494,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 8
-- Mapped to slices: 8
-- Validated: 21
+- Active requirements: 6
+- Mapped to slices: 6
+- Validated: 23
 - Unmapped active requirements: 0
