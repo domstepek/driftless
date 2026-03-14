@@ -222,13 +222,13 @@ Guidelines:
 ### R018 — CI/CD pipeline for driftless repo
 
 - Class: operability
-- Status: active
+- Status: validated
 - Description: GitHub Actions workflow for test, lint, build on PRs; automated npm publish on tagged releases
 - Why it matters: Prevents broken releases and automates the publish flow
 - Source: user
 - Primary owning slice: M003/S02
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M003/S02 — ci.yml gates PRs with check+test+build, release.yml automates npm publish with provenance + GitHub Release on v* tags. Both YAML files validated, CI command sequence passes locally (222 tests), all key components verified. Full operational proof requires merge + tag push.
 - Notes: This is CI for driftless itself, not the actions it installs
 
 ### R019 — OSS community files
@@ -472,7 +472,7 @@ Guidelines:
 | R015 | primary-user-loop  | validated    | M001/S04      | M001/S02           | M001/S04 |
 | R016 | launchability      | validated    | M003/S01      | none               | M003/S01 |
 | R017 | launchability      | validated    | M003/S01      | none               | M003/S01 |
-| R018 | operability        | active       | M003/S02      | none               | unmapped |
+| R018 | operability        | validated    | M003/S02      | none               | M003/S02 |
 | R019 | launchability      | active       | M003/S03      | none               | unmapped |
 | R020 | launchability      | active       | M003/S03      | none               | unmapped |
 | R021 | launchability      | active       | M004/S01      | none               | unmapped |
@@ -494,7 +494,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 9
-- Mapped to slices: 9
-- Validated: 20
+- Active requirements: 8
+- Mapped to slices: 8
+- Validated: 21
 - Unmapped active requirements: 0

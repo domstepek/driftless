@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    name: Publish & Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check (lint + types)
+        run: pnpm run check
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Validate version
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          PKG_VERSION=$(node -p "require('./packages/cli/package.json').version")
+          echo "Tag version:     $TAG_VERSION"
+          echo "Package version: $PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match packages/cli/package.json version ($PKG_VERSION)"
+            exit 1
+          fi
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          CHANGELOG=$(awk "/^## \\[$VERSION\\]/{found=1; next} /^## \\[/{if(found) exit} found" CHANGELOG.md)
+          if [ -z "$CHANGELOG" ]; then
+            echo "No CHANGELOG section found for v$VERSION — using fallback."
+            echo "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." > release-notes.md
+          else
+            echo "$CHANGELOG" > release-notes.md
+          fi
+
+      - name: Publish to npm
+        run: pnpm -r publish --access public --no-git-checks --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md
+          generate_release_notes: false

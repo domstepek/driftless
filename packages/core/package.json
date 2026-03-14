@@ -2,6 +2,23 @@
   "name": "@driftless-ai/core",
   "version": "1.0.0",
   "description": "Core types, utilities, and framework adapters for driftless",
+  "keywords": [
+    "ai",
+    "docs-from-tests",
+    "documentation",
+    "driftless",
+    "e2e",
+    "framework-adapters",
+    "testing"
+  ],
+  "homepage": "https://github.com/domstepek/driftless#readme",
+  "license": "MIT",
+  "author": "Dom Stepek",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/domstepek/driftless.git",
+    "directory": "packages/core"
+  },
   "files": [
     "dist"
   ],
@@ -11,23 +28,6 @@
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/domstepek/driftless.git",
-    "directory": "packages/core"
-  },
-  "license": "MIT",
-  "homepage": "https://github.com/domstepek/driftless#readme",
-  "author": "Dom Stepek",
-  "keywords": [
-    "driftless",
-    "documentation",
-    "e2e",
-    "testing",
-    "ai",
-    "docs-from-tests",
-    "framework-adapters"
-  ],
   "scripts": {
     "build": "vp pack",
     "dev": "vp pack --watch",

@@ -58,7 +58,7 @@ This milestone is complete only when all are true:
 
 - [x] **S01: npm Package Publishing + v1.0.0 Release** `risk:high` `depends:[]`
   > After this: `npm install -g @driftless-ai/cli && driftless --version` returns 1.0.0, installed from the live npm registry. CHANGELOG.md summarizes all M001+M002 work. Both `@driftless-ai/core` and `@driftless-ai/cli` are live on npmjs.com.
-- [ ] **S02: CI/CD Pipeline + Automated Releases** `risk:medium` `depends:[S01]`
+- [x] **S02: CI/CD Pipeline + Automated Releases** `risk:medium` `depends:[S01]`
   > After this: pushing a `v1.0.1` tag to main triggers GitHub Actions that runs tests, publishes both packages to npm with provenance, and creates a GitHub Release with changelog body. PRs run test+lint+build and block merge on failure.
 - [ ] **S03: README + Community Files + Repo Hygiene** `risk:low` `depends:[S01]`
   > After this: the GitHub repo looks like a professional OSS project — README with badges and install instructions, MIT license, contributing guide, code of conduct, security policy, issue/PR templates, FUNDING.yml, repo topics/description, and branch protection rules.

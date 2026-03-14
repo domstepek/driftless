@@ -58,7 +58,13 @@ vi.mock("@driftless-ai/core", async () => {
 });
 
 import * as p from "@clack/prompts";
-import { detectTestFramework, configExists, generateDocs, installSkills, installWorkflows } from "@driftless-ai/core";
+import {
+  detectTestFramework,
+  configExists,
+  generateDocs,
+  installSkills,
+  installWorkflows,
+} from "@driftless-ai/core";
 import { gatherConfig } from "../src/prompts/init-prompts.js";
 import { initCommand } from "../src/commands/init.js";
 
@@ -679,9 +685,7 @@ describe("initCommand", () => {
       expect(p.log.info).toHaveBeenCalledWith(
         expect.stringContaining("Workflows that would be scaffolded"),
       );
-      expect(p.log.message).toHaveBeenCalledWith(
-        expect.stringContaining("driftless-test-gen.yml"),
-      );
+      expect(p.log.message).toHaveBeenCalledWith(expect.stringContaining("driftless-test-gen.yml"));
     });
 
     it("shows both workflows in dry-run when both capabilities are selected", async () => {
@@ -706,11 +710,7 @@ describe("initCommand", () => {
         const cwd = opts?.cwd ?? process.cwd();
         const workflowsDir = join(cwd, ".github", "workflows");
         await mkdir(workflowsDir, { recursive: true });
-        await fsWriteFile(
-          join(workflowsDir, "driftless-doc-update.yml"),
-          "name: test",
-          "utf-8",
-        );
+        await fsWriteFile(join(workflowsDir, "driftless-doc-update.yml"), "name: test", "utf-8");
         return {
           installed: ["driftless-doc-update.yml"],
           workflowsDir: ".github/workflows",
