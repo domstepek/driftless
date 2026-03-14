@@ -49,11 +49,15 @@ vi.mock("@driftless/core", async () => {
       installed: ["doc-generator", "e2e-writer"],
       skillsDir: ".skills",
     }),
+    installWorkflows: vi.fn().mockResolvedValue({
+      installed: ["driftless-doc-update.yml"],
+      workflowsDir: ".github/workflows",
+    }),
   };
 });
 
 import * as p from "@clack/prompts";
-import { detectTestFramework, configExists, generateDocs, installSkills } from "@driftless/core";
+import { detectTestFramework, configExists, generateDocs, installSkills, installWorkflows } from "@driftless/core";
 import { gatherConfig } from "../src/prompts/init-prompts.js";
 import { initCommand } from "../src/commands/init.js";
 
@@ -64,6 +68,7 @@ const mockConfirm = vi.mocked(p.confirm);
 const mockIsCancel = vi.mocked(p.isCancel);
 const mockGenerateDocs = vi.mocked(generateDocs);
 const mockInstallSkills = vi.mocked(installSkills);
+const mockInstallWorkflows = vi.mocked(installWorkflows);
 
 const defaultGroupResult = {
   testPaths: "tests/**/*.spec.ts",
@@ -136,6 +141,10 @@ describe("initCommand", () => {
     mockInstallSkills.mockResolvedValue({
       installed: ["doc-generator", "e2e-writer"],
       skillsDir: ".skills",
+    });
+    mockInstallWorkflows.mockResolvedValue({
+      installed: ["driftless-doc-update.yml"],
+      workflowsDir: ".github/workflows",
     });
   });
 
@@ -563,6 +572,123 @@ describe("initCommand", () => {
         expect.stringContaining("Skills installed: doc-generator"),
         ".driftless.json",
       );
+    });
+  });
+
+  // --- Workflow scaffolding tests ---
+
+  describe("workflow scaffolding", () => {
+    it("calls installWorkflows when capabilities present", async () => {
+      await initCommand(makeOptions());
+
+      expect(mockInstallWorkflows).toHaveBeenCalledOnce();
+      expect(mockInstallWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ capabilities: expect.arrayContaining(["doc-generator"]) }),
+        expect.objectContaining({ cwd: tmpDir }),
+      );
+    });
+
+    it("skips workflow installation in dry-run mode", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(mockInstallWorkflows).not.toHaveBeenCalled();
+    });
+
+    it("skips workflow installation when capabilities array is empty", async () => {
+      mockGroup.mockResolvedValue({
+        ...defaultGroupResult,
+        capabilities: [] as const,
+      });
+
+      await initCommand(makeOptions());
+
+      expect(mockInstallWorkflows).not.toHaveBeenCalled();
+    });
+
+    it("includes workflow info in summary note", async () => {
+      await initCommand(makeOptions());
+
+      expect(p.note).toHaveBeenCalledWith(
+        expect.stringContaining("Workflows scaffolded: driftless-doc-update.yml"),
+        ".driftless.json",
+      );
+    });
+
+    it("does not include workflows in summary when none installed", async () => {
+      mockInstallWorkflows.mockResolvedValue({
+        installed: [],
+        workflowsDir: ".github/workflows",
+      });
+
+      await initCommand(makeOptions());
+
+      expect(p.note).toHaveBeenCalledWith(
+        expect.not.stringContaining("Workflows scaffolded"),
+        ".driftless.json",
+      );
+    });
+
+    it("writes debug log with workflows phase entry", async () => {
+      await initCommand(makeOptions());
+
+      const debugLogPath = join(tmpDir, ".driftless", "debug.log");
+      const entries = JSON.parse(await readFile(debugLogPath, "utf-8"));
+      const phases = entries.map((e: { phase: string }) => e.phase);
+      expect(phases).toContain("workflows");
+
+      const workflowEntry = entries.find((e: { phase: string }) => e.phase === "workflows");
+      expect(workflowEntry.data.installed).toEqual(["driftless-doc-update.yml"]);
+      expect(workflowEntry.data.workflowsDir).toBe(".github/workflows");
+    });
+
+    it("shows workflow paths in dry-run preview", async () => {
+      await initCommand(makeOptions({ dryRun: true }));
+
+      expect(p.log.info).toHaveBeenCalledWith(
+        expect.stringContaining("Workflows that would be scaffolded"),
+      );
+      expect(p.log.message).toHaveBeenCalledWith(
+        expect.stringContaining("driftless-doc-update.yml"),
+      );
+    });
+
+    it("does not show workflow paths in dry-run when doc-generator not in capabilities", async () => {
+      mockGroup.mockResolvedValue({
+        ...defaultGroupResult,
+        capabilities: ["e2e-writer"] as const,
+      });
+
+      await initCommand(makeOptions({ dryRun: true }));
+
+      // Should NOT have the workflows preview
+      const infoCalls = vi.mocked(p.log.info).mock.calls.map((c) => c[0]);
+      expect(infoCalls.every((msg) => !msg.includes("Workflows that would be scaffolded"))).toBe(
+        true,
+      );
+    });
+
+    it("registers workflow files with transaction for rollback", async () => {
+      // Make installWorkflows write a real file so we can verify it exists
+      mockInstallWorkflows.mockImplementation(async (_config, opts) => {
+        const cwd = opts?.cwd ?? process.cwd();
+        const workflowsDir = join(cwd, ".github", "workflows");
+        await mkdir(workflowsDir, { recursive: true });
+        await fsWriteFile(
+          join(workflowsDir, "driftless-doc-update.yml"),
+          "name: test",
+          "utf-8",
+        );
+        return {
+          installed: ["driftless-doc-update.yml"],
+          workflowsDir: ".github/workflows",
+        };
+      });
+
+      await initCommand(makeOptions());
+
+      const workflowPath = join(tmpDir, ".github", "workflows", "driftless-doc-update.yml");
+      expect(await pathExists(workflowPath)).toBe(true);
+      expect(await pathExists(join(tmpDir, ".github", "workflows"))).toBe(true);
     });
   });
 });

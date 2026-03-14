@@ -35,6 +35,14 @@ export {
   type InstallSkillsResult,
 } from "./skills.js";
 
+export { docUpdateWorkflowTemplate } from "./workflows.js";
+
+export {
+  installWorkflows,
+  type InstallWorkflowsOptions,
+  type InstallWorkflowsResult,
+} from "./workflows.js";
+
 export { FileTransaction } from "./transaction.js";
 
 export { DebugLogger, type DebugEntry } from "./logger.js";

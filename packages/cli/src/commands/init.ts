@@ -8,6 +8,7 @@ import {
   FileTransaction,
   generateDocs,
   installSkills,
+  installWorkflows,
   outputFilename,
   resolveGlobs,
 } from "@driftless/core";
@@ -15,6 +16,7 @@ import type {
   GenerateResult,
   InitOptions,
   InstallSkillsResult,
+  InstallWorkflowsResult,
   ProgressEvent,
 } from "@driftless/core";
 import { gatherConfig } from "../prompts/init-prompts.js";
@@ -105,6 +107,18 @@ export async function initCommand(options: InitOptions): Promise<void> {
       p.log.info(`Skills that would be installed (${skillPaths.length}):`);
       for (const s of skillPaths) {
         p.log.message(`  ${s}`);
+      }
+    }
+
+    // Compute workflow file paths
+    const workflowPaths = config.capabilities
+      .filter((cap) => cap === "doc-generator")
+      .map(() => join(".github", "workflows", "driftless-doc-update.yml"));
+
+    if (workflowPaths.length > 0) {
+      p.log.info(`Workflows that would be scaffolded (${workflowPaths.length}):`);
+      for (const w of workflowPaths) {
+        p.log.message(`  ${w}`);
       }
     }
 
@@ -222,6 +236,33 @@ export async function initCommand(options: InitOptions): Promise<void> {
       }
     }
 
+    // Install workflow files for selected capabilities
+    let workflowsResult: InstallWorkflowsResult | undefined;
+    if (config.capabilities.length > 0) {
+      workflowsResult = await installWorkflows(config, { cwd });
+
+      // Register workflow files and directory with the transaction
+      if (workflowsResult.installed.length > 0) {
+        const absWorkflowsDir = join(cwd, workflowsResult.workflowsDir);
+        await transaction.mkdir(join(cwd, ".github"));
+        await transaction.mkdir(absWorkflowsDir);
+        for (const filename of workflowsResult.installed) {
+          transaction.track(join(absWorkflowsDir, filename), "file");
+        }
+      }
+
+      logger.log("workflows", {
+        installed: workflowsResult.installed,
+        workflowsDir: workflowsResult.workflowsDir,
+      });
+
+      if (workflowsResult.installed.length > 0) {
+        p.log.info(
+          `Scaffolded ${workflowsResult.installed.length} workflow${workflowsResult.installed.length === 1 ? "" : "s"}: ${workflowsResult.installed.join(", ")}`,
+        );
+      }
+    }
+
     // Flush debug log before commit
     logger.log("complete", { success: true });
     await logger.flush(debugLogPath);
@@ -253,6 +294,11 @@ export async function initCommand(options: InitOptions): Promise<void> {
     if (skillsResult && skillsResult.installed.length > 0) {
       lines.push("");
       lines.push(`Skills installed: ${skillsResult.installed.join(", ")}`);
+    }
+
+    if (workflowsResult && workflowsResult.installed.length > 0) {
+      lines.push("");
+      lines.push(`Workflows scaffolded: ${workflowsResult.installed.join(", ")}`);
     }
 
     const summaryLines = lines.filter(Boolean).join("\n");

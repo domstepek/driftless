@@ -12,7 +12,7 @@ A developer with e2e tests can run one command and get training documentation th
 
 ## Current State
 
-M001 complete. The CLI (`npx driftless init`) runs an interactive wizard that auto-detects test frameworks, prompts for configuration, spawns Claude Code in headless mode to generate training docs from e2e tests, installs parameterized skill files, and writes `.driftless.json` config. Three doc framework adapters (plain-md, fumadocs MDX, docusaurus MDX). Fail-safe init with FileTransaction rollback, structured debug logging, and `--dry-run` preview. 146 tests across 11 files, both packages build clean. 15 of 17 M001 requirements validated. Next: M002 (GitHub Actions + PR Automation).
+M001 complete. M002 S01 complete. The CLI (`npx driftless init`) runs an interactive wizard that auto-detects test frameworks, prompts for configuration, spawns Claude Code in headless mode to generate training docs from e2e tests, installs parameterized skill files, scaffolds GitHub Actions workflow files based on selected capabilities, and writes `.driftless.json` config. Three doc framework adapters (plain-md, fumadocs MDX, docusaurus MDX). Fail-safe init with FileTransaction rollback, structured debug logging, and `--dry-run` preview. The doc-update workflow template (`driftless-doc-update.yml`) produces valid GitHub Actions YAML with PR-triggered staleness detection via `claude-code-action@v1`, operational edge handling (fork PRs, missing API key, bot loop prevention), and config parameterization. 185 tests across 12 files, both packages build clean. 17 of 17 active requirements validated. Next: M002/S02 (test-generation workflow template).
 
 ## Architecture / Key Patterns
 

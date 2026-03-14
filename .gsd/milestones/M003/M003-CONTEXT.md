@@ -19,6 +19,7 @@ The tool works (M001) and the automation works (M002), but it's not shippable as
 - See a proper README with badges, install instructions, usage examples, and API reference
 - Open issues using structured templates, submit PRs following contribution guidelines
 - Trust the project has CI (tests, lint, build pass on every PR) and automated releases
+- Enable auto-updates during `driftless init` so the CLI self-updates on every launch
 
 ### Entry point / environment
 
@@ -63,6 +64,7 @@ To call this milestone complete, we must prove:
 - R019 — OSS community files (MIT license, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, FUNDING.yml)
 - R020 — GitHub repo hygiene
 - R025 — Claude-first documented in README
+- R032 (new) — CLI auto-update: check npm for newer version on every launch, install if autoUpdate enabled
 
 ## Scope
 
@@ -76,6 +78,7 @@ To call this milestone complete, we must prove:
 - GitHub repo: topics, description, branch protection (via agent-browser)
 - `.github/FUNDING.yml` — GitHub Sponsors button (individual account); requires enabling GitHub Sponsors for the account first (GitHub UI, agent-browser)
 - README with badges, install, usage, API, contributing sections
+- **CLI auto-update:** Last prompt in `driftless init` asks "Would you like to enable auto-updates?" (default: yes). Stored as `autoUpdate: true` in `.driftless.json`. On every CLI launch, if enabled, check npm registry for a newer version and install it before running the command. Adds ~1-2s on cold runs. Must handle: network failures (skip silently, don't block), major version jumps (warn but still update), `npx` vs global install (detect and use the right update mechanism).
 
 ### Out of Scope / Non-Goals
 
@@ -101,3 +104,4 @@ To call this milestone complete, we must prove:
 - Package name: `driftless` (unscoped) or `@driftless/cli` (scoped)? Unscoped is simpler for `npx` usage.
 - Changeset-based releases vs tag-based? Need to decide during M003 planning.
 - Should we use `semantic-release` or a simpler manual tag + automated publish flow?
+- Auto-update mechanism: `npm install -g driftless@latest` for global installs vs clearing the npx cache for `npx` users? Need to research the right approach during M003 planning. The `update-notifier` pattern (used by npm itself) is a reference, but we want silent auto-install, not just notification.

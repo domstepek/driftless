@@ -150,13 +150,13 @@ Guidelines:
 ### R012 — GitHub Action: PR-triggered doc staleness detection + update
 
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: A distributable GitHub Action that detects changed files in a PR, maps them to affected features, runs the doc-generator skill via claude-code-action to update stale docs, and commits the updates to the PR
 - Why it matters: This is the "can't drift" part — docs stay current automatically on every PR
 - Source: user
 - Primary owning slice: M002/S01
 - Supporting slices: M002/S02
-- Validation: unmapped
+- Validation: M002/S01 — `docUpdateWorkflowTemplate(config)` produces valid GitHub Actions YAML with pull_request trigger, correct permissions, PR-branch checkout, staleness detection prompt via claude-code-action@v1, and operational edge handling. `installWorkflows` scaffolds the file during init with capability gating. 30 template tests + 8 init integration tests verify structure, content, and scaffolding. Live staleness detection accuracy is milestone-level UAT.
 - Notes: Action is installed into user repos by the CLI, not run in the driftless repo itself
 
 ### R013 — GitHub Action: PR-triggered e2e test generation
@@ -174,13 +174,13 @@ Guidelines:
 ### R014 — GitHub Action uses claude-code-action
 
 - Class: integration
-- Status: active
+- Status: validated
 - Description: Both GitHub Actions use `anthropics/claude-code-action@v1` as the inference backend
 - Why it matters: Standard, maintained integration path — no custom API wiring needed
 - Source: user
 - Primary owning slice: M002/S01
 - Supporting slices: M002/S02
-- Validation: unmapped
+- Validation: M002/S01 — doc-update workflow template output contains `anthropics/claude-code-action@v1` step with `anthropic_api_key` input and `allowed_tools`. Verified by unit tests on template content.
 - Notes: Requires ANTHROPIC_API_KEY as repo secret in user's repo
 
 ### R015 — Modular capability selection
@@ -454,9 +454,9 @@ Guidelines:
 | R009 | core-capability    | validated    | M001/S02      | M001/S03, M001/S04 | M001/S02 |
 | R010 | quality-attribute  | validated    | M001/S02      | none               | M001/S02 |
 | R011 | quality-attribute  | validated    | M001/S05      | none               | M001/S05 |
-| R012 | core-capability    | active       | M002/S01      | M002/S02           | unmapped |
+| R012 | core-capability    | validated    | M002/S01      | M002/S02           | M002/S01 |
 | R013 | core-capability    | active       | M002/S02      | none               | unmapped |
-| R014 | integration        | active       | M002/S01      | M002/S02           | unmapped |
+| R014 | integration        | validated    | M002/S01      | M002/S02           | M002/S01 |
 | R015 | primary-user-loop  | validated    | M001/S04      | M001/S02           | M001/S04 |
 | R016 | launchability      | active       | M003/S01      | none               | unmapped |
 | R017 | launchability      | active       | M003/S01      | none               | unmapped |
@@ -483,5 +483,5 @@ Guidelines:
 
 - Active requirements: 17
 - Mapped to slices: 17
-- Validated: 15
+- Validated: 17
 - Unmapped active requirements: 0
