@@ -56,7 +56,7 @@ This milestone is complete only when all are true:
 
 - [x] **S01: Strategic Foundation — Vision, Product Strategy, PRD** `risk:high` `depends:[]`
   > After this: three documents at `~/Desktop/driftless/` (00-vision-strategy.md, 03-product-strategy.md, 04-product-requirements.md) establish the canonical narrative, ICP, competitive landscape, and full product definition with Mermaid diagrams
-- [ ] **S02: Business Operations — LLC, Pricing, Payment, GTM, Ops** `risk:medium` `depends:[S01]`
+- [x] **S02: Business Operations — LLC, Pricing, Payment, GTM, Ops** `risk:medium` `depends:[S01]`
   > After this: five documents at `~/Desktop/driftless/` (02-business-structure.md, 05-pricing-model.md, 06-payment-infrastructure.md, 07-gtm-plan.md, 08-operations-playbook.md) cover LLC formation with actionable steps, pricing with competitor benchmarks, payment provider recommendation, go-to-market plan, and operations playbook
 - [ ] **S03: Synthesis + Scaffold — Exec Summary, Pitch Deck, Private Repo** `risk:low` `depends:[S01,S02]`
   > After this: executive summary and pitch deck outline at `~/Desktop/driftless/` synthesize all prior docs, private repo exists on GitHub with README and license, architecture decisions appended to DECISIONS.md, all 10 documents cross-reference consistently
