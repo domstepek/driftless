@@ -65,25 +65,25 @@ Driftless is configured via `.driftless.json` at your project root:
   "$schema": "https://raw.githubusercontent.com/domstepek/driftless/main/packages/core/driftless.schema.json",
   "testPaths": ["tests/e2e/**/*.spec.ts"],
   "outputDir": "docs/generated",
-  "docFramework": "plain-md",       // "plain-md" | "fumadocs" | "docusaurus"
+  "docFramework": "plain-md", // "plain-md" | "fumadocs" | "docusaurus"
   "capabilities": ["doc-generator"], // "doc-generator" | "e2e-writer"
   "skillsDir": ".driftless/skills",
-  "testFramework": "playwright",     // auto-detected, or set manually
+  "testFramework": "playwright", // auto-detected, or set manually
   "agentHarness": "claude-code",
-  "docGrouping": "per-file"          // one doc per test file
+  "docGrouping": "per-file", // one doc per test file
 }
 ```
 
-| Field | Type | Description |
-|---|---|---|
-| `testPaths` | `string[]` | Glob patterns for test files to analyze |
-| `outputDir` | `string` | Directory where generated docs are written |
-| `docFramework` | `"plain-md" \| "fumadocs" \| "docusaurus"` | Target documentation framework |
-| `capabilities` | `Capability[]` | Features to enable: `"doc-generator"`, `"e2e-writer"` |
-| `skillsDir` | `string` | Directory for skill definition files |
-| `testFramework` | `TestFramework` | Detected or manually set test framework |
-| `agentHarness` | `"claude-code"` | Agent harness used to run generation |
-| `docGrouping` | `"per-file"` | How test files map to generated docs |
+| Field           | Type                                       | Description                                           |
+| --------------- | ------------------------------------------ | ----------------------------------------------------- |
+| `testPaths`     | `string[]`                                 | Glob patterns for test files to analyze               |
+| `outputDir`     | `string`                                   | Directory where generated docs are written            |
+| `docFramework`  | `"plain-md" \| "fumadocs" \| "docusaurus"` | Target documentation framework                        |
+| `capabilities`  | `Capability[]`                             | Features to enable: `"doc-generator"`, `"e2e-writer"` |
+| `skillsDir`     | `string`                                   | Directory for skill definition files                  |
+| `testFramework` | `TestFramework`                            | Detected or manually set test framework               |
+| `agentHarness`  | `"claude-code"`                            | Agent harness used to run generation                  |
+| `docGrouping`   | `"per-file"`                               | How test files map to generated docs                  |
 
 ### Supported Test Frameworks
 
@@ -97,9 +97,9 @@ Playwright · Cypress · TestCafe · Detox · WebDriverIO · Nightwatch
 
 ## Packages
 
-| Package | Description |
-|---|---|
-| [`@driftless-ai/cli`](./packages/cli) | CLI entry point — `driftless init` and future commands |
+| Package                                 | Description                                                       |
+| --------------------------------------- | ----------------------------------------------------------------- |
+| [`@driftless-ai/cli`](./packages/cli)   | CLI entry point — `driftless init` and future commands            |
 | [`@driftless-ai/core`](./packages/core) | Core library — config, detection, generation, adapters, workflows |
 
 ### Core API Surface

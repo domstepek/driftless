@@ -48,7 +48,7 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: Landing page + docs site deployed on Vercel** `risk:high` `depends:[]`
+- [x] **S01: Landing page + docs site deployed on Vercel** `risk:high` `depends:[]`
   > After this: a polished landing page is live on a Vercel URL with the install command, before/after example, and links to docs. The `/docs` section has a working Quick Start page with fumadocs navigation, search, and dark mode. Existing monorepo tests still pass.
 - [ ] **S02: Documentation content** `risk:low` `depends:[S01]`
   > After this: all five required docs sections are complete — Quick Start (expanded), full init walkthrough, GitHub Action setup, configuration reference, and troubleshooting — with accurate content ported from and expanding on the README.

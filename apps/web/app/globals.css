@@ -1,0 +1,55 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+@source "../node_modules/fumadocs-ui/dist/**/*.js";
+
+@theme inline {
+  --font-display: var(--font-instrument), "Instrument Serif", Georgia, serif;
+  --animate-fade-up: fade-up 0.6s ease-out both;
+  --animate-fade-in: fade-in 0.8s ease-out both;
+  --animate-slide-in-right: slide-in-right 0.7s ease-out both;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+/* Dot grid background */
+.bg-grid-pattern {
+  background-image: radial-gradient(circle, rgba(128, 128, 128, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Noise overlay for texture */
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Horizontal rule with fade */
+.hr-fade {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-fd-border), transparent);
+}

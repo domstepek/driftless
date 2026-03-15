@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { detectPackageManager, getGlobalInstallCommand, isNpxContext } from "../src/package-manager.js";
+import {
+  detectPackageManager,
+  getGlobalInstallCommand,
+  isNpxContext,
+} from "../src/package-manager.js";
 
 describe("package-manager module", () => {
   const originalEnv = { ...process.env };

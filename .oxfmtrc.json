@@ -1,4 +1,4 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/oxfmt/main/npm/oxfmt/configuration_schema.json",
-  "ignorePatterns": [".gsd/"]
+  "ignorePatterns": [".gsd/", "apps/web/.next/", "apps/web/.source/"]
 }

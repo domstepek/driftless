@@ -104,7 +104,9 @@ export interface PerformUpdateOptions {
  *
  * Never throws. All error paths are caught and skipped silently or with a hint.
  */
-export async function performUpdate(options: PerformUpdateOptions): Promise<UpdateCheckResult | null> {
+export async function performUpdate(
+  options: PerformUpdateOptions,
+): Promise<UpdateCheckResult | null> {
   // Skip in CI environments
   if (process.env.CI) return null;
 
@@ -137,9 +139,7 @@ export async function performUpdate(options: PerformUpdateOptions): Promise<Upda
   try {
     execSync(cmd, { stdio: "pipe" });
   } catch {
-    process.stderr.write(
-      `Auto-update failed — run \`${cmd}\` manually.\n`,
-    );
+    process.stderr.write(`Auto-update failed — run \`${cmd}\` manually.\n`);
   }
 
   return check;

@@ -258,14 +258,14 @@ Guidelines:
 ### R021 — Vercel landing/marketing page
 
 - Class: launchability
-- Status: active
+- Status: validated
 - Description: A polished marketing landing page deployed on Vercel that explains what driftless does, shows usage examples, and links to docs/GitHub
 - Why it matters: The front door — first thing potential users see
 - Source: user
 - Primary owning slice: M004/S01
 - Supporting slices: none
-- Validation: unmapped
-- Notes: none
+- Validation: M004/S01 — editorial landing page live at `driftless-six.vercel.app` with hero, `npx @driftless-ai/cli@latest init` install command, before/after example, feature highlights, /docs and GitHub links. 19 OG/Twitter Card meta tags. Responsive (mobile/tablet/desktop). 268 tests pass.
+- Notes: OG image URLs reference driftless.dev (custom domain not yet mapped); images work on Vercel URL directly
 
 ### R022 — Fumadocs documentation site
 
@@ -475,7 +475,7 @@ Guidelines:
 | R018 | operability        | validated    | M003/S02      | none               | M003/S02 |
 | R019 | launchability      | validated    | M003/S03      | none               | M003/S03 |
 | R020 | launchability      | validated    | M003/S03      | none               | M003/S03 |
-| R021 | launchability      | active       | M004/S01      | none               | unmapped |
+| R021 | launchability      | validated    | M004/S01      | none               | M004/S01 |
 | R022 | launchability      | active       | M004/S02      | none               | unmapped |
 | R023 | launchability      | active       | M004/S03      | none               | unmapped |
 | R024 | quality-attribute  | active       | M004/S03      | none               | unmapped |
@@ -494,7 +494,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 5
-- Mapped to slices: 5
-- Validated: 24
+- Active requirements: 4
+- Mapped to slices: 4
+- Validated: 25
 - Unmapped active requirements: 0

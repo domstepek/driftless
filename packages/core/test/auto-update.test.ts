@@ -98,10 +98,7 @@ describe("auto-update module", () => {
     });
 
     it("returns safe default on network timeout", async () => {
-      vi.stubGlobal(
-        "fetch",
-        vi.fn().mockRejectedValue(new DOMException("Aborted", "AbortError")),
-      );
+      vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new DOMException("Aborted", "AbortError")));
 
       const result = await checkForUpdate("1.0.0");
       expect(result).toEqual({
@@ -113,10 +110,7 @@ describe("auto-update module", () => {
     });
 
     it("returns safe default on HTTP 404", async () => {
-      vi.stubGlobal(
-        "fetch",
-        vi.fn().mockResolvedValue({ ok: false, status: 404 }),
-      );
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 404 }));
 
       const result = await checkForUpdate("1.0.0");
       expect(result.isNewer).toBe(false);
@@ -194,8 +188,8 @@ describe("auto-update module", () => {
 
       await performUpdate({ currentVersion: "1.0.0" });
 
-      const calls = stderrSpy.mock.calls.map(c => c[0] as string);
-      expect(calls.some(c => c.includes("major version change"))).toBe(true);
+      const calls = stderrSpy.mock.calls.map((c) => c[0] as string);
+      expect(calls.some((c) => c.includes("major version change"))).toBe(true);
     });
 
     it("executes global install command on update", async () => {
@@ -205,7 +199,9 @@ describe("auto-update module", () => {
 
       await performUpdate({ currentVersion: "1.0.0" });
 
-      expect(execSync).toHaveBeenCalledWith("pnpm install -g @driftless-ai/cli@latest", { stdio: "pipe" });
+      expect(execSync).toHaveBeenCalledWith("pnpm install -g @driftless-ai/cli@latest", {
+        stdio: "pipe",
+      });
     });
 
     it("writes hint to stderr on execSync failure (permission error)", async () => {
@@ -218,8 +214,8 @@ describe("auto-update module", () => {
       const result = await performUpdate({ currentVersion: "1.0.0" });
 
       expect(result!.isNewer).toBe(true);
-      const calls = stderrSpy.mock.calls.map(c => c[0] as string);
-      expect(calls.some(c => c.includes("Auto-update failed"))).toBe(true);
+      const calls = stderrSpy.mock.calls.map((c) => c[0] as string);
+      expect(calls.some((c) => c.includes("Auto-update failed"))).toBe(true);
     });
 
     it("uses config packageManager when user agent is missing", async () => {
@@ -231,7 +227,9 @@ describe("auto-update module", () => {
         config: { packageManager: "yarn" },
       });
 
-      expect(execSync).toHaveBeenCalledWith("yarn global add @driftless-ai/cli@latest", { stdio: "pipe" });
+      expect(execSync).toHaveBeenCalledWith("yarn global add @driftless-ai/cli@latest", {
+        stdio: "pipe",
+      });
     });
 
     it("defaults to npm when no user agent or config", async () => {
@@ -240,7 +238,9 @@ describe("auto-update module", () => {
 
       await performUpdate({ currentVersion: "1.0.0" });
 
-      expect(execSync).toHaveBeenCalledWith("npm install -g @driftless-ai/cli@latest", { stdio: "pipe" });
+      expect(execSync).toHaveBeenCalledWith("npm install -g @driftless-ai/cli@latest", {
+        stdio: "pipe",
+      });
     });
   });
 });

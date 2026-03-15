@@ -1,0 +1,55 @@
+---
+title: Quick Start
+description: Get started with driftless in under 5 minutes.
+---
+
+## Installation
+
+Run the init command in your project root:
+
+```bash
+npx @driftless-ai/cli@latest init
+```
+
+The CLI will walk you through:
+
+1. **Selecting your e2e test framework** — Playwright, Cypress, or other
+2. **Choosing a docs output format** — Markdown, fumadocs MDX, or Docusaurus MDX
+3. **Configuring your skills directory** — where training docs are written
+
+A `.driftless.json` config file is created in your project root.
+
+## How It Works
+
+driftless uses AI to read your end-to-end tests and generate training documentation that stays in sync with your actual application behavior.
+
+When your tests change, driftless detects which docs are stale and regenerates them — either locally via the CLI or automatically via GitHub Actions on every PR.
+
+### Local Usage
+
+Generate docs from your e2e tests:
+
+```bash
+npx @driftless-ai/cli@latest generate
+```
+
+### GitHub Actions
+
+Add the driftless workflow to automatically update docs when tests change:
+
+```yaml
+# .github/workflows/driftless-doc-update.yml
+name: driftless doc update
+on:
+  pull_request:
+    paths:
+      - "tests/**"
+      - "e2e/**"
+```
+
+The workflow detects stale docs and opens a PR with updated training documentation.
+
+## Next Steps
+
+- Browse the [GitHub repository](https://github.com/driftless-ai/driftless) for source code and examples
+- Read about [configuration options](/docs/configuration) to customize driftless for your project

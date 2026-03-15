@@ -8,11 +8,18 @@ import type { DriftlessConfig } from "./types.js";
  * Falls back to `config.packageManager` if the env var is missing or
  * unrecognized, then to `"npm"` as the final default.
  */
-export function detectPackageManager(config?: Pick<DriftlessConfig, "packageManager">): PackageManager {
+export function detectPackageManager(
+  config?: Pick<DriftlessConfig, "packageManager">,
+): PackageManager {
   const userAgent = process.env.npm_config_user_agent;
   if (userAgent) {
     const firstToken = userAgent.split("/")[0];
-    if (firstToken === "npm" || firstToken === "pnpm" || firstToken === "yarn" || firstToken === "bun") {
+    if (
+      firstToken === "npm" ||
+      firstToken === "pnpm" ||
+      firstToken === "yarn" ||
+      firstToken === "bun"
+    ) {
       return firstToken;
     }
   }

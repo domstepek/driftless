@@ -1,9 +1,10 @@
 packages:
   - packages/*
+  - apps/*
 
 catalog:
   "@types/minimatch": ^6.0.0
-  "@types/node": ^22
+  "@types/node": ^22.19.15
   minimatch: ^10.2.4
   typescript: ^5
   vite: npm:@voidzero-dev/vite-plus-core@0.1.11

@@ -21,6 +21,7 @@ Thumbs.db
 !.env.example
 node_modules/
 .next/
+.source/
 dist/
 dist-ssr/
 build/
@@ -35,3 +36,4 @@ coverage/
 .cache/
 tmp/
 *.local
+.vercel

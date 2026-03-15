@@ -53,11 +53,7 @@ export { FileTransaction } from "./transaction.js";
 
 export { DebugLogger, type DebugEntry } from "./logger.js";
 
-export {
-  detectPackageManager,
-  getGlobalInstallCommand,
-  isNpxContext,
-} from "./package-manager.js";
+export { detectPackageManager, getGlobalInstallCommand, isNpxContext } from "./package-manager.js";
 
 export {
   checkForUpdate,
