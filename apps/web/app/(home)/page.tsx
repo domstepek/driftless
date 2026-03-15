@@ -260,6 +260,7 @@ function Ticker() {
           style={{
             animation: "marquee 30s linear infinite",
             height: "var(--space-10)",
+            width: "max-content",
           }}
         >
           {/* Duplicate content for seamless loop */}
