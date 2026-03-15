@@ -1,4 +1,11 @@
 
+# ── Private business planning (not for public repo) ──
+.gsd/milestones/M005/
+.gsd/milestones/M006/
+.gsd/milestones/M007/
+.gsd/milestones/M008/
+.gsd/milestones/M009/
+
 # ── GSD baseline (auto-generated) ──
 .gsd/activity/
 .gsd/runtime/

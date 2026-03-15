@@ -54,7 +54,7 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: Strategic Foundation — Vision, Product Strategy, PRD** `risk:high` `depends:[]`
+- [x] **S01: Strategic Foundation — Vision, Product Strategy, PRD** `risk:high` `depends:[]`
   > After this: three documents at `~/Desktop/driftless/` (00-vision-strategy.md, 03-product-strategy.md, 04-product-requirements.md) establish the canonical narrative, ICP, competitive landscape, and full product definition with Mermaid diagrams
 - [ ] **S02: Business Operations — LLC, Pricing, Payment, GTM, Ops** `risk:medium` `depends:[S01]`
   > After this: five documents at `~/Desktop/driftless/` (02-business-structure.md, 05-pricing-model.md, 06-payment-infrastructure.md, 07-gtm-plan.md, 08-operations-playbook.md) cover LLC formation with actionable steps, pricing with competitor benchmarks, payment provider recommendation, go-to-market plan, and operations playbook
