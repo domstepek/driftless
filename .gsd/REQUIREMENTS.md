@@ -496,5 +496,5 @@ Guidelines:
 
 - Active requirements: 1
 - Mapped to slices: 1
-- Validated: 28
+- Validated: 32
 - Unmapped active requirements: 0
