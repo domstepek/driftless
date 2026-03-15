@@ -39,6 +39,13 @@ Create the static pricing page at `apps/web/app/(home)/pricing/page.tsx`. The pa
 - `apps/web/app/globals.css` — brand tokens
 - `~/Desktop/driftless/05-pricing-model.md` — tier positioning copy reference
 
+## Observability Impact
+
+- **New route**: `/pricing` appears in `next build` route manifest — future agent greps for `pricing` in build output to confirm route presence.
+- **Build error surface**: If the pricing page has broken imports or JSX errors, `next build` emits typed errors with file path (`app/(home)/pricing/page.tsx`) and line number. No silent fallback.
+- **Browser verification**: `/pricing` renders with `[ PRICING ]` section header, two tier cards, and "COMING SOON" badges — inspectable via `browser_find` for text content or `browser_assert` for text visibility.
+- **Failure state**: If the page file is missing or malformed, navigating to `/pricing` returns a Next.js 404 page — distinguishable from a successful render by absence of tier card content.
+
 ## Expected Output
 
 - `apps/web/app/(home)/pricing/page.tsx` — static pricing page with two tier cards

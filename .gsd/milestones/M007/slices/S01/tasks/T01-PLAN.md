@@ -33,6 +33,12 @@ Extract the `Nav()` and `Footer()` inline function components from `apps/web/app
 - `cd apps/web && pnpm next build` exits 0 — all existing routes present in output
 - `pnpm run test` passes 268
 
+## Observability Impact
+
+- **No new runtime signals** — this is a behavior-identical refactor. No new logs, metrics, or error paths introduced.
+- **Future agent inspection**: A future agent can verify this task by checking that `components/nav.tsx` and `components/footer.tsx` exist as named exports, and that `page.tsx` imports from `@/components/nav` and `@/components/footer`. `grep -r "from.*@/components/nav" apps/web/app` confirms wiring.
+- **Failure visibility**: If the extraction breaks imports, `next build` will emit `Module not found: Can't resolve '@/components/nav'` (or footer) with the exact file and line — no silent failures.
+
 ## Inputs
 
 - `apps/web/app/(home)/page.tsx` — source of Nav and Footer inline functions

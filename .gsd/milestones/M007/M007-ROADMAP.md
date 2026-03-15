@@ -41,7 +41,7 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: Pricing page with nav/footer integration** `risk:low` `depends:[]`
+- [x] **S01: Pricing page with nav/footer integration** `risk:low` `depends:[]`
   > After this: user navigates to `driftless-six.vercel.app/pricing` and sees Pro + Enterprise "coming soon" tier cards styled in M006 brand; `[ PRICING ]` link is in the nav bar and footer
 
 ## Boundary Map

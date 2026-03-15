@@ -41,6 +41,13 @@ Add `[ PRICING ]` link to the Nav component and a Pricing link to the Footer com
 - `apps/web/components/footer.tsx` — shared Footer from T01
 - `apps/web/app/(home)/pricing/page.tsx` — pricing page from T02
 
+## Observability Impact
+
+- **Nav link discoverability**: `[ PRICING ]` bracket text is greppable in page source and browser accessibility tree — future agent can `browser_find` for text "PRICING" to confirm presence.
+- **Footer link discoverability**: "Pricing" text link in footer is greppable and visible in accessibility tree.
+- **Route wiring**: Both links use `next/link` `Link` to `/pricing`, so client-side navigation is observable via `browser_assert` url_contains check after click — no full page reload.
+- **Failure signals**: If `/pricing` route is removed or renamed, the links still render but navigate to a 404. Agent can detect via `browser_assert` text_visible for pricing page content after navigation.
+
 ## Expected Output
 
 - `apps/web/components/nav.tsx` — modified with `[ PRICING ]` link
