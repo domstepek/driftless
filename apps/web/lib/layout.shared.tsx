@@ -5,6 +5,6 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: "driftless",
     },
-    githubUrl: "https://github.com/driftless-ai/driftless",
+    githubUrl: "https://github.com/domstepek/driftless",
   };
 }

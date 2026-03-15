@@ -11,3 +11,4 @@
 | 5 | 2026-03-14 | M010 | Pro Tier — Automated Demo/Tutorial Videos (feature c) [renumbered from M009] |
 | 6 | 2026-03-14 | M011 | Pro Tier — Signal-Driven Autonomous Development Pipeline (feature d) [renumbered from M010] |
 | 7 | 2026-03-15 | M007 | Pricing Page — static /pricing route with Pro and Enterprise "coming soon" tiers, nav + footer links; inserted before M008 (Pro tier features) |
+| 8 | 2026-03-15 | — | "What It Generates" section: replace raw `<pre>` snippets with a proper markdown/code renderer (syntax highlighting, line numbers, styled headings/lists in the training doc card) |

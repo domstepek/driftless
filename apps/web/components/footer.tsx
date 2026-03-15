@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer style={{ padding: "var(--space-20) var(--space-8) var(--space-12)" }}>
+    <footer className="px-[var(--space-4)] pb-[var(--space-12)] pt-[var(--space-20)] md:px-[var(--space-8)]">
       <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
         {/* Top row — three columns */}
-        <div className="grid gap-[var(--space-8)] md:grid-cols-3">
+        <div className="grid gap-[var(--space-6)] md:grid-cols-3 md:gap-[var(--space-8)]">
           {/* Brand */}
           <div>
             <span
@@ -48,7 +48,7 @@ export function Footer() {
               Docs
             </Link>
             <a
-              href="https://github.com/driftless-ai/driftless"
+              href="https://github.com/domstepek/driftless"
               className="text-sm transition-colors hover:text-[var(--color-text)]"
               style={{
                 fontFamily: "var(--font-body)",

@@ -4,7 +4,7 @@ import { LocalTime } from "./local-time";
 export function Nav() {
   return (
     <nav
-      className="fixed top-0 z-50 flex w-full items-center justify-between border-b px-[var(--space-8)]"
+      className="fixed top-0 z-50 flex w-full items-center justify-between border-b px-[var(--space-4)] md:px-[var(--space-8)]"
       style={{
         height: "var(--nav-height)",
         backgroundColor: "color-mix(in srgb, var(--color-bg) 90%, transparent)",
@@ -14,8 +14,8 @@ export function Nav() {
       }}
     >
       {/* Left — brand mark + nav links */}
-      <div className="flex items-center gap-[var(--space-6)]">
-        <Link href="/" className="flex items-center gap-[var(--space-3)]" style={{ textDecoration: "none" }}>
+      <div className="flex items-center gap-[var(--space-3)] md:gap-[var(--space-6)]">
+        <Link href="/" className="flex items-center gap-[var(--space-2)] md:gap-[var(--space-3)]" style={{ textDecoration: "none" }}>
           {/* Mesa mark — 3 strata layers */}
           <svg
             width="28"
@@ -37,36 +37,37 @@ export function Nav() {
         </Link>
         <Link
           href="/pricing"
-          className="font-mono text-sm tracking-[0.03em] transition-colors hover:text-[var(--color-text)]"
+          className="hidden font-mono text-sm tracking-[0.03em] transition-colors hover:text-[var(--color-text)] sm:inline"
           style={{ color: "var(--color-gray-500)" }}
         >
           [ PRICING ]
         </Link>
       </div>
 
-      {/* Center — CTA pill */}
-      <a
-        href="https://github.com/driftless-ai/driftless"
-        className="cta-pill hidden items-center font-sans text-sm font-medium transition-colors md:inline-flex"
-        style={{
-          backgroundColor: "var(--color-amber)",
-          color: "var(--color-bg)",
-          padding: "var(--space-2) var(--space-5)",
-          borderRadius: "var(--border-radius-pill)",
-        }}
-      >
-        View on GitHub
-      </a>
-
-      {/* Right — local time */}
-      <div className="hidden flex-col items-end lg:flex">
-        <LocalTime />
-        <span
-          className="font-mono text-xs uppercase tracking-[0.05em]"
-          style={{ color: "var(--color-gray-300)" }}
+      {/* Right — CTA pill (always visible) + local time (lg only) */}
+      <div className="flex items-center gap-[var(--space-4)]">
+        <a
+          href="https://github.com/domstepek/driftless"
+          className="cta-pill inline-flex items-center font-sans text-sm font-medium transition-colors"
+          style={{
+            backgroundColor: "var(--color-amber)",
+            color: "var(--color-bg)",
+            padding: "var(--space-2) var(--space-5)",
+            borderRadius: "var(--border-radius-pill)",
+          }}
         >
-          DRIFTLESS REGION, WI
-        </span>
+          GitHub
+          <span className="hidden md:inline">&nbsp;→</span>
+        </a>
+        <div className="hidden flex-col items-end lg:flex">
+          <LocalTime />
+          <span
+            className="font-mono text-xs uppercase tracking-[0.05em]"
+            style={{ color: "var(--color-gray-300)" }}
+          >
+            DRIFTLESS REGION, WI
+          </span>
+        </div>
       </div>
     </nav>
   );

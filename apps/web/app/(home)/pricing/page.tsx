@@ -106,7 +106,7 @@ export default function PricingPage() {
         }}
       >
         {/* Pricing section */}
-        <section style={{ padding: "var(--space-20) var(--space-8)" }}>
+        <section className="px-[var(--space-4)] py-[var(--space-16)] md:px-[var(--space-8)] md:py-[var(--space-20)]">
           <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
             {/* Section label */}
             <span
@@ -118,7 +118,7 @@ export default function PricingPage() {
 
             {/* Headline */}
             <h1
-              className="mt-[var(--space-4)] font-display text-[3rem] font-black uppercase leading-none tracking-[-0.02em] md:text-[4rem]"
+              className="mt-[var(--space-4)] font-display text-[2.5rem] font-black uppercase leading-none tracking-[-0.02em] md:text-[3rem] lg:text-[4rem]"
               style={{ color: "var(--color-text)" }}
             >
               Built for teams
@@ -187,7 +187,7 @@ export default function PricingPage() {
                 We&apos;re building in public.
               </p>
               <a
-                href="https://github.com/driftless-ai/driftless"
+                href="https://github.com/domstepek/driftless"
                 className="mt-[var(--space-2)] inline-block font-mono text-sm uppercase tracking-[0.03em] underline underline-offset-4 transition-colors"
                 style={{ color: "var(--color-text)" }}
               >

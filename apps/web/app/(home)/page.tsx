@@ -59,9 +59,9 @@ function Hero() {
       </div>
 
       {/* Text content — in front */}
-      <div className="relative z-10 mx-auto w-full text-center" style={{ maxWidth: "var(--max-width)" }}>
+      <div className="relative z-10 mx-auto w-full px-[var(--space-4)] text-center md:px-[var(--space-8)]" style={{ maxWidth: "var(--max-width)" }}>
         <h1
-          className="font-display text-[4.5rem] font-black uppercase leading-[0.95] tracking-[-0.02em] md:text-[5.5rem] lg:text-[6.5rem]"
+          className="font-display text-[2.5rem] font-black uppercase leading-[0.95] tracking-[-0.02em] sm:text-[3.5rem] md:text-[5.5rem] lg:text-[6.5rem]"
           style={{ color: "var(--color-text)" }}
         >
           Documentation
@@ -69,7 +69,7 @@ function Hero() {
           that writes itself
         </h1>
         <p
-          className="mx-auto mt-[var(--space-4)] text-lg"
+          className="mx-auto mt-[var(--space-4)] px-[var(--space-2)] text-base md:text-lg"
           style={{
             fontFamily: "var(--font-body)",
             color: "var(--color-gray-500)",
@@ -177,10 +177,10 @@ function HowStep({
 
 function HowItWorks() {
   return (
-    <section style={{ padding: "var(--space-20) var(--space-8)" }}>
+    <section className="px-[var(--space-4)] py-[var(--space-16)] md:px-[var(--space-8)] md:py-[var(--space-20)]">
       <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
         <h2
-          className="font-display text-[3rem] font-black uppercase leading-none tracking-[-0.02em]"
+          className="font-display text-[2rem] font-black uppercase leading-none tracking-[-0.02em] md:text-[3rem]"
           style={{ color: "var(--color-text)" }}
         >
           How It Works
@@ -243,9 +243,10 @@ function GeneratesCard({
 }) {
   return (
     <div
+      className="overflow-hidden"
       style={{
         backgroundColor: "var(--color-surface)",
-        padding: "var(--space-6)",
+        padding: "var(--space-4)",
       }}
     >
       <span
@@ -255,7 +256,7 @@ function GeneratesCard({
         {label}
       </span>
       <h4
-        className="mt-[var(--space-2)] text-xl font-semibold"
+        className="mt-[var(--space-2)] text-lg font-semibold md:text-xl"
         style={{
           fontFamily: "var(--font-body)",
           color: "var(--color-text)",
@@ -264,7 +265,7 @@ function GeneratesCard({
         {title}
       </h4>
       <p
-        className="mt-[var(--space-3)] text-base leading-relaxed"
+        className="mt-[var(--space-3)] text-sm leading-relaxed md:text-base"
         style={{
           fontFamily: "var(--font-body)",
           color: "var(--color-gray-600)",
@@ -273,7 +274,7 @@ function GeneratesCard({
         {description}
       </p>
       <pre
-        className="mt-[var(--space-4)] overflow-x-auto font-mono text-sm leading-relaxed"
+        className="mt-[var(--space-4)] overflow-x-auto font-mono text-xs leading-relaxed md:text-sm"
         style={{
           backgroundColor: "var(--color-bg)",
           padding: "var(--space-3)",
@@ -289,10 +290,10 @@ function GeneratesCard({
 
 function WhatItGenerates() {
   return (
-    <section style={{ padding: "var(--space-20) var(--space-8)" }}>
+    <section className="px-[var(--space-4)] py-[var(--space-16)] md:px-[var(--space-8)] md:py-[var(--space-20)]">
       <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
         <h2
-          className="font-display text-[3rem] font-black uppercase leading-none tracking-[-0.02em]"
+          className="font-display text-[2rem] font-black uppercase leading-none tracking-[-0.02em] md:text-[3rem]"
           style={{ color: "var(--color-text)" }}
         >
           What It Generates
