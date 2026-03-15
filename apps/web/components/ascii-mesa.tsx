@@ -2,253 +2,186 @@
 
 import { useEffect, useRef, useCallback } from "react";
 
-// ── Constants ──────────────────────────────────────────────────────────────
+// ── Config ─────────────────────────────────────────────────────────────────
 
 const AMBER = "#C4862A";
-const CHAR_FONT = "14px monospace"; // JetBrains Mono if available, fallback monospace
+const CHAR_FONT = "14px monospace";
 const CELL_W = 8;
 const CELL_H = 16;
 const FPS_CAP = 30;
-const FRAME_BUDGET_MS = 1000 / FPS_CAP; // ~33.33ms
+const FRAME_BUDGET_MS = 1000 / FPS_CAP;
 
-// Rotation: 0.4 RPM = 0.4 * 2π / 60 rad/s
-const Y_ROT_SPEED = (0.4 * 2 * Math.PI) / 60; // ≈ 0.04189 rad/s
-// X wobble: 5° amplitude, period from sin(t * 0.3)
-const X_WOBBLE_AMP = (5 * Math.PI) / 180; // 5° in radians
+// Rotation: 0.4 RPM with gentle X wobble
+const Y_ROT_SPEED = (0.4 * 2 * Math.PI) / 60;
+const X_WOBBLE_AMP = (5 * Math.PI) / 180;
 const X_WOBBLE_FREQ = 0.3;
 
-// Character density palette indexed by luminance bucket
-// Ordered by visual density: sparse → dense
-const DENSITY_CHARS = [" ", "·", "○", "░", "▒", "▓", "─", "│", "╰", "╭", "▓"];
-// Luminance thresholds for each character
-const LUMINANCE_THRESHOLDS = [0.0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95];
+const CAMERA_DIST = 3.5;
+const LIGHT_DIR: Vec3 = norm([0.5, -0.7, 0.6]);
 
-// Light direction (normalized) — top-right-front
-const LIGHT_DIR: Vec3 = normalize([0.5, -0.7, 0.6]);
+// Layer fill characters — from Hermes creative skill Unicode palette
+// Bottom (lightest) → Top (densest), matching logo graduated opacity
+const SLAB_FILL: string[] = ["░", "▒", "▓"];
+const SLAB_ALPHA: number[] = [0.8, 0.85, 0.92];
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
 type Vec3 = [number, number, number];
-
-interface MesaVertex {
+interface Vertex {
   pos: Vec3;
   normal: Vec3;
-  stratum: number; // 0 = top, 1-3 = strata layers
+  slab: number; // 0 = bottom, 1 = middle, 2 = top
 }
+
+// ── Slab geometry derived from SVG logo mark ───────────────────────────────
+// SVG coordinate space: x 0–160, y 8–110.
+// Normalized to 3D: x = (svgX − 80) / 80, y = −(svgY − 59) / 51
+// This centers the mesa at origin with y-up orientation.
+
+interface SlabDef {
+  topY: number;
+  bottomY: number;
+  topHW: number;    // half-width at top edge
+  bottomHW: number; // half-width at bottom edge
+}
+
+const SLABS: SlabDef[] = [
+  // Bottom slab (lightest, widest) — SVG: y 80–110, x 8.2–151.8 / 0–160
+  { topY: -0.412, bottomY: -1.0, topHW: 0.897, bottomHW: 1.0 },
+  // Middle slab — SVG: y 44–74, x 18.1–141.9 / 9.9–150.1
+  { topY: 0.294, bottomY: -0.294, topHW: 0.774, bottomHW: 0.876 },
+  // Top slab (darkest, narrowest) — SVG: y 8–38, x 28–132 / 19.8–140.2
+  { topY: 1.0, bottomY: 0.412, topHW: 0.65, bottomHW: 0.753 },
+];
+
+const HALF_DEPTH = 0.35;
 
 // ── Vector math ────────────────────────────────────────────────────────────
 
-function normalize(v: Vec3): Vec3 {
-  const len = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-  if (len === 0) return [0, 0, 0];
-  return [v[0] / len, v[1] / len, v[2] / len];
+function norm(v: Vec3): Vec3 {
+  const len = Math.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2);
+  return len ? [v[0] / len, v[1] / len, v[2] / len] : [0, 0, 0];
 }
 
 function dot(a: Vec3, b: Vec3): number {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
-function cross(a: Vec3, b: Vec3): Vec3 {
-  return [
-    a[1] * b[2] - a[2] * b[1],
-    a[2] * b[0] - a[0] * b[2],
-    a[0] * b[1] - a[1] * b[0],
-  ];
-}
-
-// ── Rotation matrices ──────────────────────────────────────────────────────
-
-function rotateY(p: Vec3, angle: number): Vec3 {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
+function rotY(p: Vec3, a: number): Vec3 {
+  const c = Math.cos(a), s = Math.sin(a);
   return [p[0] * c + p[2] * s, p[1], -p[0] * s + p[2] * c];
 }
 
-function rotateX(p: Vec3, angle: number): Vec3 {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
+function rotX(p: Vec3, a: number): Vec3 {
+  const c = Math.cos(a), s = Math.sin(a);
   return [p[0], p[1] * c - p[2] * s, p[1] * s + p[2] * c];
 }
 
-// ── Mesa geometry ──────────────────────────────────────────────────────────
+// ── Geometry generation ────────────────────────────────────────────────────
+// Each slab is a 3D extruded trapezoid with 6 faces:
+// front, back (trapezoid fill), top, bottom (strata edges), left, right (side edges)
 
-// Mesa is a truncated pyramid. Dimensions in unit space:
-// Base: 2.0 × 2.0 (from -1 to 1 on X and Z)
-// Top:  1.2 × 1.2 (from -0.6 to 0.6)
-// Height: 1.0 (from -0.5 to 0.5 on Y)
-// 4 strata layers at y = -0.5, -0.25, 0.0, 0.25 (base to top)
+function generateVertices(density: number): Vertex[] {
+  const verts: Vertex[] = [];
+  const dz = Math.ceil(density * 0.5); // depth-axis sample count
 
-const TOP_HALF = 0.6; // half-width of top face
-const BASE_HALF = 1.0; // half-width of base
-const MESA_H = 1.0;
-const MESA_Y_MIN = -0.5;
-const MESA_Y_MAX = 0.5;
-const STRATA_Y = [-0.5, -0.25, 0.0, 0.25]; // y-values of each stratum
+  for (let si = 0; si < SLABS.length; si++) {
+    const { topY, bottomY, topHW, bottomHW } = SLABS[si];
+    const h = topY - bottomY;
+    const hwAt = (y: number) => bottomHW + ((y - bottomY) / h) * (topHW - bottomHW);
+    const slope = Math.atan2(bottomHW - topHW, h);
 
-// Interpolate width at a given y level
-function mesaHalfWidthAtY(y: number): number {
-  const t = (y - MESA_Y_MIN) / MESA_H; // 0 at base, 1 at top
-  return BASE_HALF + t * (TOP_HALF - BASE_HALF);
-}
-
-/**
- * Generate surface sample points for the mesa.
- * Returns an array of vertices with position, normal, and stratum index.
- */
-function generateMesaVertices(density: number): MesaVertex[] {
-  const vertices: MesaVertex[] = [];
-  const step = 1 / density;
-
-  // ── Top face (y = MESA_Y_MAX) ──
-  const topNormal: Vec3 = [0, 1, 0];
-  for (let u = -TOP_HALF; u <= TOP_HALF; u += step * 0.8) {
-    for (let v = -TOP_HALF; v <= TOP_HALF; v += step * 0.8) {
-      vertices.push({
-        pos: [u, MESA_Y_MAX, v],
-        normal: topNormal,
-        stratum: 0,
-      });
+    // Front face (z = +HALF_DEPTH) and back face (z = −HALF_DEPTH)
+    for (const zSign of [1, -1]) {
+      const n: Vec3 = [0, 0, zSign];
+      for (let yi = 0; yi <= density; yi++) {
+        const y = bottomY + (yi / density) * h;
+        const hw = hwAt(y);
+        for (let xi = 0; xi <= density; xi++) {
+          const x = -hw + (2 * hw * xi) / density;
+          verts.push({ pos: [x, y, zSign * HALF_DEPTH], normal: n, slab: si });
+        }
+      }
     }
-  }
 
-  // ── Four sloped sides ──
-  // Each side is parameterized by (u along edge, v from base to top)
-  const sides: { axis: "x" | "z"; sign: number }[] = [
-    { axis: "z", sign: 1 },  // front face (z > 0)
-    { axis: "z", sign: -1 }, // back face (z < 0)
-    { axis: "x", sign: 1 },  // right face (x > 0)
-    { axis: "x", sign: -1 }, // left face (x < 0)
-  ];
-
-  for (const side of sides) {
-    for (let yi = 0; yi <= density; yi++) {
-      const t = yi / density;
-      const y = MESA_Y_MIN + t * MESA_H;
-      const hw = mesaHalfWidthAtY(y);
-
-      // Determine which stratum this y belongs to
-      let stratum = 3;
-      for (let s = STRATA_Y.length - 1; s >= 0; s--) {
-        if (y >= STRATA_Y[s]) {
-          stratum = s;
-          break;
+    // Top face (y = topY)
+    {
+      const n: Vec3 = [0, 1, 0];
+      for (let zi = 0; zi <= dz; zi++) {
+        const z = -HALF_DEPTH + (2 * HALF_DEPTH * zi) / dz;
+        for (let xi = 0; xi <= density; xi++) {
+          const x = -topHW + (2 * topHW * xi) / density;
+          verts.push({ pos: [x, topY, z], normal: n, slab: si });
         }
       }
+    }
 
-      // Compute surface normal for this side
-      // The slope angle depends on the inward lean
-      const slopeAngle = Math.atan2(BASE_HALF - TOP_HALF, MESA_H);
-      let normal: Vec3;
-
-      if (side.axis === "z") {
-        normal = normalize([0, Math.sin(slopeAngle), side.sign * Math.cos(slopeAngle)]);
-      } else {
-        normal = normalize([side.sign * Math.cos(slopeAngle), Math.sin(slopeAngle), 0]);
-      }
-
-      for (let ui = 0; ui <= density; ui++) {
-        const u = -hw + (2 * hw * ui) / density;
-        let pos: Vec3;
-
-        if (side.axis === "z") {
-          pos = [u, y, side.sign * hw];
-        } else {
-          pos = [side.sign * hw, y, u];
+    // Bottom face (y = bottomY)
+    {
+      const n: Vec3 = [0, -1, 0];
+      for (let zi = 0; zi <= dz; zi++) {
+        const z = -HALF_DEPTH + (2 * HALF_DEPTH * zi) / dz;
+        for (let xi = 0; xi <= density; xi++) {
+          const x = -bottomHW + (2 * bottomHW * xi) / density;
+          verts.push({ pos: [x, bottomY, z], normal: n, slab: si });
         }
+      }
+    }
 
-        vertices.push({ pos, normal, stratum });
+    // Left face (x = −hw) and right face (x = +hw)
+    for (const xSign of [-1, 1]) {
+      const n: Vec3 = norm([xSign * Math.cos(slope), Math.sin(slope), 0]);
+      for (let yi = 0; yi <= density; yi++) {
+        const y = bottomY + (yi / density) * h;
+        const hw = hwAt(y);
+        for (let zi = 0; zi <= dz; zi++) {
+          const z = -HALF_DEPTH + (2 * HALF_DEPTH * zi) / dz;
+          verts.push({ pos: [xSign * hw, y, z], normal: n, slab: si });
+        }
       }
     }
   }
 
-  // ── Strata bands (horizontal ridges) ──
-  // Add extra detail at strata lines — horizontal ledges that protrude slightly
-  for (let si = 0; si < STRATA_Y.length; si++) {
-    const y = STRATA_Y[si];
-    const hw = mesaHalfWidthAtY(y);
-    const ledge = 0.04; // slight outward protrusion
-    const ledgeNormal: Vec3 = [0, 1, 0]; // upward-facing ledge
-
-    for (const side of sides) {
-      for (let ui = 0; ui <= density * 1.5; ui++) {
-        const u = -hw + (2 * hw * ui) / (density * 1.5);
-        let pos: Vec3;
-
-        if (side.axis === "z") {
-          pos = [u, y + ledge, side.sign * (hw + ledge)];
-        } else {
-          pos = [side.sign * (hw + ledge), y + ledge, u];
-        }
-
-        vertices.push({ pos, normal: ledgeNormal, stratum: si });
-      }
-    }
-  }
-
-  return vertices;
+  return verts;
 }
 
 // ── Character selection ────────────────────────────────────────────────────
+// Normal-driven: front/back → slab fill, top/bottom → strata edge, sides → vertical edge
 
-function luminanceToChar(lum: number, normal: Vec3): string {
-  // Context-sensitive: prefer edge characters based on normal direction
-  const absNx = Math.abs(normal[0]);
-  const absNz = Math.abs(normal[2]);
-  const absNy = Math.abs(normal[1]);
+function selectChar(lum: number, n: Vec3, slab: number): string {
+  if (lum < 0.08) return " ";
 
-  // If normal is mostly horizontal, consider edge characters
-  if (lum > 0.55 && absNy < 0.3) {
-    // Vertical edge for X-facing normals
-    if (absNx > absNz && absNx > 0.5) return "│";
-    // Horizontal edge for Z-facing normals
-    if (absNz > absNx && absNz > 0.5) return "─";
+  const ax = Math.abs(n[0]);
+  const ay = Math.abs(n[1]);
+  const az = Math.abs(n[2]);
+
+  // Top/bottom faces → horizontal strata line (the key logo outline)
+  if (ay > 0.7 && lum > 0.15) return "─";
+
+  // Side faces → vertical edge
+  if (ax > 0.6 && az < 0.3 && lum > 0.2) return "│";
+
+  // Corner hints at bright transitions between faces
+  if (lum > 0.55 && ay > 0.25 && (ax > 0.25 || az > 0.25)) {
+    if (n[0] > 0.2 && n[2] > 0.2) return "╭";
+    if (n[0] < -0.2 && n[2] > 0.2) return "╮";
+    if (n[0] > 0.2 && n[2] < -0.2) return "╰";
+    if (n[0] < -0.2 && n[2] < -0.2) return "╯";
   }
 
-  // Corner characters at high luminance with mixed normals
-  if (lum > 0.75) {
-    if (normal[1] > 0.3 && (absNx > 0.3 || absNz > 0.3)) {
-      // Top corners
-      if (normal[0] > 0.2 && normal[2] > 0.2) return "╭";
-      if (normal[0] < -0.2 && normal[2] > 0.2) return "╮";
-      // Bottom corners
-      if (normal[0] > 0.2 && normal[2] < -0.2) return "╰";
-      if (normal[0] < -0.2 && normal[2] < -0.2) return "╯";
-    }
-  }
-
-  // Fallback: density ramp based on luminance
-  for (let i = LUMINANCE_THRESHOLDS.length - 1; i >= 0; i--) {
-    if (lum >= LUMINANCE_THRESHOLDS[i]) return DENSITY_CHARS[i];
-  }
-  return " ";
+  // Front/back fill: layer-specific density character
+  return SLAB_FILL[slab];
 }
 
 // ── Projection ─────────────────────────────────────────────────────────────
 
-const CAMERA_DIST = 3.5; // Distance from origin to camera
-
-function project(
-  p: Vec3,
-  cols: number,
-  rows: number
-): { col: number; row: number; z: number } | null {
-  // Perspective projection
+function project(p: Vec3, cols: number, rows: number) {
   const z = p[2] + CAMERA_DIST;
-  if (z <= 0.1) return null; // Behind camera
-
-  const scale = CAMERA_DIST / z;
-  const screenX = p[0] * scale;
-  const screenY = -p[1] * scale; // Flip Y for screen coords
-
-  const col = Math.round(screenX * (cols / 3) + cols / 2);
-  const row = Math.round(screenY * (rows / 2.2) + rows / 2);
-
-  // Validate projection coordinates
-  if (!isFinite(col) || !isFinite(row) || !isFinite(z)) {
-    console.error("Degenerate projection:", { vertex: p, col, row, z });
-    return null;
-  }
-
+  if (z <= 0.1) return null;
+  const s = CAMERA_DIST / z;
+  const col = Math.round(p[0] * s * (cols / 3) + cols / 2);
+  const row = Math.round(-p[1] * s * (rows / 2.2) + rows / 2);
+  if (!isFinite(col) || !isFinite(row)) return null;
   return { col, row, z };
 }
 
@@ -260,249 +193,194 @@ export function AsciiMesa() {
   const angleRef = useRef(0);
   const lastFrameRef = useRef(0);
   const startTimeRef = useRef(0);
-  const pausedRef = useRef({
-    reducedMotion: false,
-    hidden: false,
-    offScreen: false,
-  });
-  const staticFrameDrawn = useRef(false);
+  const pauseRef = useRef({ reducedMotion: false, hidden: false, offScreen: false });
+  const staticDrawn = useRef(false);
 
   const renderFrame = useCallback(
     (
       ctx: CanvasRenderingContext2D,
       cols: number,
       rows: number,
-      vertices: MesaVertex[],
-      time: number
+      vertices: Vertex[],
+      time: number,
     ) => {
-      // Clear
       ctx.clearRect(0, 0, cols * CELL_W, rows * CELL_H);
 
-      // Compute rotation angles
-      const yAngle = angleRef.current;
-      const xAngle = X_WOBBLE_AMP * Math.sin(time * X_WOBBLE_FREQ);
+      const yA = angleRef.current;
+      const xA = X_WOBBLE_AMP * Math.sin(time * X_WOBBLE_FREQ);
 
-      // Z-buffer (one entry per grid cell): stores depth, character, alpha
-      const zbuf: (
-        | { z: number; char: string; alpha: number }
-        | undefined
-      )[] = new Array(cols * rows);
+      // Z-buffer: one entry per grid cell
+      type Cell = { z: number; char: string; alpha: number };
+      const zbuf: (Cell | undefined)[] = new Array(cols * rows);
 
-      // Project each vertex
-      for (let i = 0; i < vertices.length; i++) {
-        const v = vertices[i];
-        // Rotate
-        let p = rotateY(v.pos, yAngle);
-        p = rotateX(p, xAngle);
+      for (const v of vertices) {
+        let p = rotY(v.pos, yA);
+        p = rotX(p, xA);
+        let n = rotY(v.normal, yA);
+        n = rotX(n, xA);
 
-        // Also rotate normal for lighting
-        let n = rotateY(v.normal, yAngle);
-        n = rotateX(n, xAngle);
-
-        // Project
         const proj = project(p, cols, rows);
         if (!proj) continue;
-
         const { col, row, z } = proj;
         if (col < 0 || col >= cols || row < 0 || row >= rows) continue;
 
         const idx = row * cols + col;
+        if (zbuf[idx] && zbuf[idx]!.z <= z) continue;
 
-        // Z-buffer test
-        if (zbuf[idx] && zbuf[idx].z <= z) continue;
-
-        // Compute luminance from surface normal and light direction
+        // Diffuse + ambient lighting
         let lum = dot(n, LIGHT_DIR);
-        lum = Math.max(0, Math.min(1, lum * 0.7 + 0.3)); // Ambient + diffuse
+        lum = Math.max(0, Math.min(1, lum * 0.7 + 0.3));
 
-        const char = luminanceToChar(lum, n);
+        const char = selectChar(lum, n, v.slab);
         if (char === " ") continue;
 
-        // Stratum-based opacity: top (0) = 0.9, each layer decreases by 0.08
-        const alpha = Math.max(0.3, 0.9 - v.stratum * 0.08);
-
-        zbuf[idx] = { z, char, alpha: alpha * (0.5 + lum * 0.5) };
+        const alpha = SLAB_ALPHA[v.slab] * (0.4 + lum * 0.6);
+        zbuf[idx] = { z, char, alpha };
       }
 
       // Render from z-buffer
       ctx.font = CHAR_FONT;
       ctx.textBaseline = "top";
+      ctx.fillStyle = AMBER;
 
-      for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-          const cell = zbuf[row * cols + col];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cell = zbuf[r * cols + c];
           if (!cell) continue;
-
           ctx.globalAlpha = cell.alpha;
-          ctx.fillStyle = AMBER;
-          ctx.fillText(cell.char, col * CELL_W, row * CELL_H);
+          ctx.fillText(cell.char, c * CELL_W, r * CELL_H);
         }
       }
 
       ctx.globalAlpha = 1;
     },
-    []
+    [],
   );
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    // ── Size canvas to container ──
     const container = canvas.parentElement;
     if (!container) return;
 
     const dpr = window.devicePixelRatio || 1;
-    let logicalW = container.clientWidth;
-    let logicalH = container.clientHeight;
-    let cols = Math.floor(logicalW / CELL_W);
-    let rows = Math.floor(logicalH / CELL_H);
+    let cols = 0;
+    let rows = 0;
 
-    function sizeCanvas() {
+    function resize() {
       if (!canvas || !ctx || !container) return;
-      logicalW = container.clientWidth;
-      logicalH = container.clientHeight;
-      cols = Math.floor(logicalW / CELL_W);
-      rows = Math.floor(logicalH / CELL_H);
-
-      canvas.width = logicalW * dpr;
-      canvas.height = logicalH * dpr;
-      canvas.style.width = `${logicalW}px`;
-      canvas.style.height = `${logicalH}px`;
+      const lw = container.clientWidth;
+      const lh = container.clientHeight;
+      cols = Math.floor(lw / CELL_W);
+      rows = Math.floor(lh / CELL_H);
+      canvas.width = lw * dpr;
+      canvas.height = lh * dpr;
+      canvas.style.width = `${lw}px`;
+      canvas.style.height = `${lh}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    sizeCanvas();
+    resize();
 
-    // Generate mesa geometry — density controls point count
-    // Use fewer points for small canvases
-    const densityScale = Math.max(12, Math.min(30, Math.floor(cols / 5)));
-    const vertices = generateMesaVertices(densityScale);
+    // Scale point density to canvas size
+    const densityScale = Math.max(12, Math.min(28, Math.floor(cols / 5)));
+    const vertices = generateVertices(densityScale);
 
-    // ── Pause state helpers ──
-    function isPaused(): boolean {
-      return (
-        pausedRef.current.reducedMotion ||
-        pausedRef.current.hidden ||
-        pausedRef.current.offScreen
-      );
+    // ── Pause state ──
+    function isPaused() {
+      return pauseRef.current.reducedMotion || pauseRef.current.hidden || pauseRef.current.offScreen;
+    }
+
+    function drawStatic() {
+      if (!ctx || staticDrawn.current) return;
+      renderFrame(ctx, cols, rows, vertices, 0);
+      staticDrawn.current = true;
     }
 
     // ── Animation loop ──
     startTimeRef.current = performance.now() / 1000;
 
-    function drawStaticFrame() {
-      if (!ctx || staticFrameDrawn.current) return;
-      renderFrame(ctx, cols, rows, vertices, 0);
-      staticFrameDrawn.current = true;
-    }
-
-    function loop(timestamp: number) {
+    function loop(ts: number) {
       if (isPaused()) return;
-
-      const elapsed = timestamp - lastFrameRef.current;
+      const elapsed = ts - lastFrameRef.current;
       if (elapsed < FRAME_BUDGET_MS) {
         rafRef.current = requestAnimationFrame(loop);
         return;
       }
-
-      // Frame budget observability
       if (lastFrameRef.current > 0 && elapsed > FRAME_BUDGET_MS * 1.5) {
         console.warn(`Mesa frame budget exceeded: ${elapsed.toFixed(1)}ms`);
       }
-
-      lastFrameRef.current = timestamp;
-
-      const dt = elapsed / 1000;
-      angleRef.current += Y_ROT_SPEED * dt;
-      const time = (timestamp / 1000) - startTimeRef.current;
-
-      renderFrame(ctx!, cols, rows, vertices, time);
+      lastFrameRef.current = ts;
+      angleRef.current += Y_ROT_SPEED * (elapsed / 1000);
+      renderFrame(ctx!, cols, rows, vertices, ts / 1000 - startTimeRef.current);
       rafRef.current = requestAnimationFrame(loop);
     }
 
-    function startAnimation() {
+    function start() {
       if (isPaused()) return;
-      staticFrameDrawn.current = false;
+      staticDrawn.current = false;
       lastFrameRef.current = performance.now();
       rafRef.current = requestAnimationFrame(loop);
     }
 
-    function stopAnimation() {
+    function stop() {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = 0;
       }
     }
 
-    // ── 1. prefers-reduced-motion ──
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    function handleMotionChange(e: MediaQueryListEvent | MediaQueryList) {
-      pausedRef.current.reducedMotion = e.matches;
+    // ── prefers-reduced-motion ──
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function onMotion(e: MediaQueryListEvent | MediaQueryList) {
+      pauseRef.current.reducedMotion = e.matches;
       if (e.matches) {
-        stopAnimation();
-        drawStaticFrame();
+        stop();
+        drawStatic();
       } else {
-        startAnimation();
+        start();
       }
     }
-    handleMotionChange(motionQuery);
-    motionQuery.addEventListener("change", handleMotionChange as (e: MediaQueryListEvent) => void);
+    onMotion(mq);
+    mq.addEventListener("change", onMotion as (e: MediaQueryListEvent) => void);
 
-    // ── 2. Page Visibility ──
-    function handleVisibility() {
-      const hidden = document.hidden;
-      pausedRef.current.hidden = hidden;
-      if (hidden) {
-        stopAnimation();
-      } else {
-        startAnimation();
-      }
+    // ── Page visibility ──
+    function onVis() {
+      pauseRef.current.hidden = document.hidden;
+      document.hidden ? stop() : start();
     }
-    document.addEventListener("visibilitychange", handleVisibility);
+    document.addEventListener("visibilitychange", onVis);
 
-    // ── 3. IntersectionObserver ──
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        const offScreen = !entry.isIntersecting;
-        pausedRef.current.offScreen = offScreen;
-        if (offScreen) {
-          stopAnimation();
-        } else {
-          startAnimation();
-        }
+    // ── Intersection observer ──
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        pauseRef.current.offScreen = !entry.isIntersecting;
+        entry.isIntersecting ? start() : stop();
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
-    observer.observe(canvas);
+    io.observe(canvas);
 
-    // ── Resize handler ──
-    const resizeObserver = new ResizeObserver(() => {
-      sizeCanvas();
-      // Re-render immediately if paused on static frame
-      if (pausedRef.current.reducedMotion) {
-        staticFrameDrawn.current = false;
-        drawStaticFrame();
+    // ── Resize observer ──
+    const ro = new ResizeObserver(() => {
+      resize();
+      if (pauseRef.current.reducedMotion) {
+        staticDrawn.current = false;
+        drawStatic();
       }
     });
-    resizeObserver.observe(container);
+    ro.observe(container);
 
-    // Start if not paused
-    if (!isPaused()) {
-      startAnimation();
-    }
+    if (!isPaused()) start();
 
-    // ── Cleanup ──
     return () => {
-      stopAnimation();
-      motionQuery.removeEventListener("change", handleMotionChange as (e: MediaQueryListEvent) => void);
-      document.removeEventListener("visibilitychange", handleVisibility);
-      observer.disconnect();
-      resizeObserver.disconnect();
+      stop();
+      mq.removeEventListener("change", onMotion as (e: MediaQueryListEvent) => void);
+      document.removeEventListener("visibilitychange", onVis);
+      io.disconnect();
+      ro.disconnect();
     };
   }, [renderFrame]);
 
@@ -510,11 +388,7 @@ export function AsciiMesa() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      style={{
-        display: "block",
-        width: "100%",
-        height: "100%",
-      }}
+      style={{ display: "block", width: "100%", height: "100%" }}
     />
   );
 }
