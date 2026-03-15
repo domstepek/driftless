@@ -1,6 +1,7 @@
 import { MesaCanvas } from "@/components/mesa-canvas";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
+import { WhatItGenerates } from "@/components/what-it-generates";
 
 /* -------------------------------------------------------------------------- */
 /*  Hero                                                                      */
@@ -219,106 +220,6 @@ function HowItWorks() {
             number="03"
             title="Docs Update Automatically"
             description="Human-readable documentation is generated and committed. Staleness checks flag drift before it ships. Your docs never fall behind."
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  What It Generates                                                         */
-/* -------------------------------------------------------------------------- */
-
-function GeneratesCard({
-  label,
-  title,
-  description,
-  snippet,
-}: {
-  label: string;
-  title: string;
-  description: string;
-  snippet: string;
-}) {
-  return (
-    <div
-      className="overflow-hidden"
-      style={{
-        backgroundColor: "var(--color-surface)",
-        padding: "var(--space-4)",
-      }}
-    >
-      <span
-        className="block font-mono text-xs font-medium uppercase tracking-[0.05em]"
-        style={{ color: "var(--color-amber)" }}
-      >
-        {label}
-      </span>
-      <h4
-        className="mt-[var(--space-2)] text-lg font-semibold md:text-xl"
-        style={{
-          fontFamily: "var(--font-body)",
-          color: "var(--color-text)",
-        }}
-      >
-        {title}
-      </h4>
-      <p
-        className="mt-[var(--space-3)] text-sm leading-relaxed md:text-base"
-        style={{
-          fontFamily: "var(--font-body)",
-          color: "var(--color-gray-600)",
-        }}
-      >
-        {description}
-      </p>
-      <pre
-        className="mt-[var(--space-4)] overflow-x-auto font-mono text-xs leading-relaxed md:text-sm"
-        style={{
-          backgroundColor: "var(--color-bg)",
-          padding: "var(--space-3)",
-          color: "var(--color-gray-500)",
-          letterSpacing: "0.02em",
-        }}
-      >
-        <code>{snippet}</code>
-      </pre>
-    </div>
-  );
-}
-
-function WhatItGenerates() {
-  return (
-    <section className="px-[var(--space-4)] py-[var(--space-16)] md:px-[var(--space-8)] md:py-[var(--space-20)]">
-      <div className="mx-auto" style={{ maxWidth: "var(--max-width)" }}>
-        <h2
-          className="font-display text-[2rem] font-black uppercase leading-none tracking-[-0.02em] md:text-[3rem]"
-          style={{ color: "var(--color-text)" }}
-        >
-          What It Generates
-        </h2>
-        <div
-          className="mt-[var(--space-4)]"
-          style={{
-            height: "1px",
-            backgroundColor: "var(--color-border)",
-          }}
-        />
-        <div
-          className="mt-[var(--space-10)] grid gap-[var(--space-6)] lg:grid-cols-2"
-        >
-          <GeneratesCard
-            label="TRAINING DOC"
-            title="Human-Readable Documentation"
-            description="Step-by-step guides generated directly from your test interactions. Every click, fill, and assertion becomes a clear instruction."
-            snippet={`## Creating a New Workspace\n\n1. Navigate to the Dashboard\n2. Click "New workspace"\n3. Enter a name\n4. Click "Create" to confirm`}
-          />
-          <GeneratesCard
-            label="E2E TEST"
-            title="End-to-End Test Coverage"
-            description="Your existing tests are analyzed and documented. Driftless understands test structure, assertions, and user flows without modification."
-            snippet={`test('user creates workspace', async ({ page }) => {\n  await page.goto('/dashboard');\n  await page.getByRole('button').click();\n  await expect(page).toHaveURL('/workspace');\n});`}
           />
         </div>
       </div>
