@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 172 172" fill="none">
+  <!-- favicon square canvas: mark centered (y +23), 6px viewBox padding -->
+  <polygon points="0,133 160,133 151.765,103 8.235,103"          fill="#C4862A" fill-opacity="0.22" stroke="#C4862A" stroke-width="2"/>
+  <polygon points="9.882,97 150.118,97 141.882,67 18.118,67"     fill="#C4862A" fill-opacity="0.46" stroke="#C4862A" stroke-width="2"/>
+  <polygon points="19.765,61 140.235,61 132,31 28,31"            fill="#C4862A" fill-opacity="0.72" stroke="#C4862A" stroke-width="2"/>
+</svg>

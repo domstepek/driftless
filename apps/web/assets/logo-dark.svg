@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 392 126" fill="none">
+  <rect x="-6" y="-6" width="392" height="126" fill="#0A0A0A"/>
+  <polygon points="0,110 160,110 151.765,80 8.235,80"           fill="#C4862A" fill-opacity="0.22" stroke="#C4862A" stroke-width="1.8"/>
+  <polygon points="9.882,74 150.118,74 141.882,44 18.118,44"    fill="#C4862A" fill-opacity="0.46" stroke="#C4862A" stroke-width="1.8"/>
+  <polygon points="19.765,38 140.235,38 132,8 28,8"             fill="#C4862A" fill-opacity="0.72" stroke="#C4862A" stroke-width="1.8"/>
+  <text x="180" y="84" font-family="'Familjen Grotesk','Inter',sans-serif" font-weight="700" font-size="72" letter-spacing="-2" fill="#FAFAF8">driftless</text>
+</svg>

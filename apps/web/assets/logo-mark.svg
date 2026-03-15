@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 172 126" fill="none">
+  <!-- driftless mesa mark — slope: 28/102 on all layers, 6px viewBox padding -->
+  <polygon points="0,110 160,110 151.765,80 8.235,80"           fill="#C4862A" fill-opacity="0.22" stroke="#C4862A" stroke-width="1.8"/>
+  <polygon points="9.882,74 150.118,74 141.882,44 18.118,44"    fill="#C4862A" fill-opacity="0.46" stroke="#C4862A" stroke-width="1.8"/>
+  <polygon points="19.765,38 140.235,38 132,8 28,8"             fill="#C4862A" fill-opacity="0.72" stroke="#C4862A" stroke-width="1.8"/>
+</svg>

@@ -13,14 +13,28 @@ export function Nav() {
         borderColor: "var(--color-border)",
       }}
     >
-      {/* Left — brand name + nav links */}
+      {/* Left — brand mark + nav links */}
       <div className="flex items-center gap-[var(--space-6)]">
-        <span
-          className="font-mono text-sm font-medium uppercase tracking-[0.03em]"
-          style={{ color: "var(--color-text)" }}
-        >
-          driftless
-        </span>
+        <Link href="/" className="flex items-center gap-[var(--space-3)]" style={{ textDecoration: "none" }}>
+          {/* Mesa mark — 3 strata layers */}
+          <svg
+            width="28"
+            height="20"
+            viewBox="-6 -6 172 126"
+            fill="none"
+            aria-hidden="true"
+          >
+            <polygon points="0,110 160,110 151.765,80 8.235,80"          fill="#C4862A" fillOpacity="0.22" stroke="#C4862A" strokeWidth="1.8"/>
+            <polygon points="9.882,74 150.118,74 141.882,44 18.118,44"  fill="#C4862A" fillOpacity="0.46" stroke="#C4862A" strokeWidth="1.8"/>
+            <polygon points="19.765,38 140.235,38 132,8 28,8"           fill="#C4862A" fillOpacity="0.72" stroke="#C4862A" strokeWidth="1.8"/>
+          </svg>
+          <span
+            className="font-mono text-sm font-medium uppercase tracking-[0.03em]"
+            style={{ color: "var(--color-text)" }}
+          >
+            driftless
+          </span>
+        </Link>
         <Link
           href="/pricing"
           className="font-mono text-sm tracking-[0.03em] transition-colors hover:text-[var(--color-text)]"
