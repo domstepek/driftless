@@ -282,25 +282,25 @@ Guidelines:
 ### R023 — X/Twitter product launch playbook
 
 - Class: launchability
-- Status: active
+- Status: validated
 - Description: A day-by-day posting strategy for launching driftless on X/Twitter, targeting SWE communities
 - Why it matters: Open source tools need visibility to get adoption and contributors
 - Source: user
 - Primary owning slice: M004/S03
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M004/S03 — 671-line playbook at `~/Desktop/driftless/m004-launch-playbook.md` with 18 posting sessions (21 tweets), Mermaid gantt timeline, 7-tweet launch thread, engagement strategy with 6 reply templates, operational notes. All tweets reference real URLs (16× Vercel, 11× GitHub, 6× install command). Zero placeholder contamination verified by grep.
 - Notes: Format, structure, and engagement optimization informed by web research during M004 planning
 
 ### R024 — Launch playbook informed by web research
 
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: M004 planning includes active google_search research for OSS launch best practices, SWE community engagement on X, optimal post structure, and playbook format decisions
 - Why it matters: Launch strategy should be evidence-based, not guesswork
 - Source: user
 - Primary owning slice: M004/S03
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M004/S03 — S03-RESEARCH.md findings directly applied: Tue–Thu 10 AM ET posting window, 1-2 hashtag max per post, 5-7 tweet thread length, varied daily angles, reply template strategy, small-account amplification tactics. Playbook structure mirrors research recommendations.
 - Notes: Research covers: playbook format (spreadsheet, doc, tool), post structure for engagement, SWE community norms on X
 
 ### R025 — Claude-first with documented future harness support
@@ -477,8 +477,8 @@ Guidelines:
 | R020 | launchability      | validated    | M003/S03      | none               | M003/S03 |
 | R021 | launchability      | validated    | M004/S01      | none               | M004/S01 |
 | R022 | launchability      | validated    | M004/S02      | none               | M004/S02 |
-| R023 | launchability      | active       | M004/S03      | none               | unmapped |
-| R024 | quality-attribute  | active       | M004/S03      | none               | unmapped |
+| R023 | launchability      | validated    | M004/S03      | none               | M004/S03 |
+| R024 | quality-attribute  | validated    | M004/S03      | none               | M004/S03 |
 | R025 | constraint         | active       | M001          | M003/S03           | unmapped |
 | R026 | quality-attribute  | deferred     | none          | none               | unmapped |
 | R027 | quality-attribute  | deferred     | none          | none               | unmapped |
@@ -494,7 +494,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 3
-- Mapped to slices: 3
-- Validated: 26
+- Active requirements: 1
+- Mapped to slices: 1
+- Validated: 28
 - Unmapped active requirements: 0
