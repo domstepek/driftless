@@ -2,7 +2,7 @@
 
 **Active Milestone:** M006 — Brand Identity + Landing Page Revamp
 **Active Slice:** S02 — Landing Page Rebuild + Vercel Deploy
-**Phase:** planned → ready for execution
+**Phase:** executing
 **Requirements Status:** 29 active · 0 validated · 5 deferred · 2 out of scope
 
 ## Milestone Registry
@@ -18,10 +18,10 @@
 - ⬜ **M010:** M010
 
 ## Recent Decisions
-- None new — S02 follows D080-D084 established in S01
+- None recorded
 
 ## Blockers
 - None
 
 ## Next Action
-Execute S02/T01 — rebuild landing page with brand system (tokens, fonts, layout, six sections).
+Execute T02: Rebuild OG image, download font asset, clean up mesa-preview, and deploy to Vercel in slice S02.

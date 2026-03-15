@@ -42,6 +42,14 @@ Rebuild the OpenGraph image to match the new brutalist brand (white bg, dark tex
 - Browser: `driftless-six.vercel.app/docs` — fumadocs docs site renders with sidebar
 - Browser: check OG meta tag `og:image` resolves to `/opengraph-image`
 
+## Observability Impact
+
+- **OG image generation**: `next build` renders OG images at build time — build log shows success/failure for image route generation. A missing or corrupt font file causes a build-time error with a clear stack trace pointing at the `readFile` call.
+- **Font loading**: If the TTF path is wrong or file is missing, `readFile` throws `ENOENT` — visible in build output immediately.
+- **mesa-preview deletion**: Route removal is verified by `next build` — no dangling imports. If anything still references the route, the build fails with a module-not-found error.
+- **Deployment**: Vercel deployment logs show build success/failure. The live site's `og:image` meta tag and the `/opengraph-image` route are inspectable via browser DevTools or `curl -I`.
+- **Inspection**: Future agent can verify OG image by checking `<meta property="og:image">` in page source, or fetching `/opengraph-image` directly to confirm it returns `image/png`.
+
 ## Inputs
 
 - `apps/web/app/opengraph-image.tsx` — current OG image to rebuild
