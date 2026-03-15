@@ -67,3 +67,11 @@ Replace the entire `(home)` route's visual identity. Rebuild `globals.css` with 
 - `apps/web/app/(home)/layout.tsx` — custom wrapper, no fumadocs HomeLayout
 - `apps/web/components/local-time.tsx` — new hydration-safe client component
 - `apps/web/app/(home)/page.tsx` — fully rebuilt landing page with all six sections
+
+## Observability Impact
+
+**Signals changed:** Brand design tokens are now defined in `globals.css` as CSS custom properties — inspectable via browser DevTools computed styles. Font loading observable via Network tab (three Google Font requests). Mesa integration observable via Canvas element presence in DOM.
+
+**Future agent inspection:** Verify token system by checking `getComputedStyle(document.documentElement).getPropertyValue('--color-amber')` returns `#C4862A`. Verify fonts loaded by checking `document.fonts.check('900 16px Familjen Grotesk')`. Verify all six sections by querying `document.querySelectorAll('section, nav, footer').length >= 6`.
+
+**Failure visibility:** Missing fonts render as fallback system fonts (visible mismatch). Missing CSS tokens cause `var()` fallback to initial values (visible as unstyled elements). `next build` catches type errors and import failures at build time. Mesa `console.warn('Mesa frame budget exceeded:')` from S01 remains active.

@@ -49,7 +49,7 @@
 
 ## Tasks
 
-- [ ] **T01: Rebuild landing page with brand system — tokens, fonts, layout, and all six sections** `est:45m`
+- [x] **T01: Rebuild landing page with brand system — tokens, fonts, layout, and all six sections** `est:45m`
   - Why: This is the core deliverable — replace the editorial page with the brutalist-technical-white design system. Tokens, fonts, and layout are prerequisites that the page sections immediately consume, so they're built in one flow.
   - Files: `apps/web/app/globals.css`, `apps/web/app/layout.tsx`, `apps/web/app/(home)/layout.tsx`, `apps/web/app/(home)/page.tsx`, `apps/web/components/local-time.tsx`
   - Do: (1) Rebuild `globals.css` — keep fumadocs imports, replace `@theme inline` with full brand token block from appendix, remove old keyframes/utility classes. (2) Update root `layout.tsx` — swap Instrument Serif for 3 new fonts via `next/font/google`, apply CSS variables to `<html>`, keep `RootProvider`. (3) Replace `(home)/layout.tsx` — remove `HomeLayout` import, render plain wrapper with `--color-bg` background scoped to home route. (4) Create `LocalTime` client component — `"use client"`, `useState` + `useEffect` for hydration-safe time display, `--:--:--` SSR placeholder. (5) Rebuild `(home)/page.tsx` — custom nav with brand name + CTA pill + LocalTime, hero section with `next/dynamic` mesa + headline + annotation SVG lines + floating data cards (hidden below `lg`), how-it-works with 3 numbered steps, what-it-generates 2-column card grid, dark ticker marquee with CSS infinite scroll + reduced-motion pause, footer with three columns + tagline. No scroll animations. Mesa z-layered behind text.
