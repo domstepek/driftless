@@ -55,7 +55,7 @@ This milestone is complete only when all are true:
 
 - [x] **S01: Brand Identity + ASCII Mesa Component** `risk:high` `depends:[]`
   > After this: brand identity document exists at ~/Desktop/driftless/brand-identity.md with all design tokens; ASCII mesa component renders in dev server (pnpm dev) with visible rotation, character palette, and geological amber tint; `next build` passes
-- [ ] **S02: Landing Page Rebuild + Vercel Deploy** `risk:medium` `depends:[S01]`
+- [x] **S02: Landing Page Rebuild + Vercel Deploy** `risk:medium` `depends:[S01]`
   > After this: visit driftless-six.vercel.app and see the complete brutalist-technical-white redesign — condensed grotesque headline, spinning ASCII mesa, annotation lines connecting to floating data cards, monospace label system, geological amber accent on CTA, ticker marquee, all sections styled as technical datasheets; fumadocs /docs unchanged
 
 ## Boundary Map

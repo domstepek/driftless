@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export const alt = "driftless — Your e2e tests become training docs";
 export const size = {
@@ -8,111 +10,118 @@ export const size = {
 export const contentType = "image/png";
 
 export default async function Image() {
+  const fontData = await readFile(
+    join(process.cwd(), "assets", "FamiljenGrotesk-Bold.ttf"),
+  );
+
   return new ImageResponse(
     <div
       style={{
-        background: "linear-gradient(145deg, #0a0a0b 0%, #18181b 50%, #0a0a0b 100%)",
+        background: "#FAFAF8",
         width: "100%",
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "60px 80px",
+        padding: "60px 72px",
+        fontFamily: "Familjen Grotesk",
       }}
     >
-      {/* Logo + wordmark */}
+      {/* Top: brand name in mono style */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "16px",
-          marginBottom: "40px",
-        }}
-      >
-        <div
-          style={{
-            width: "52px",
-            height: "52px",
-            borderRadius: "14px",
-            background: "#f59e0b",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "28px",
-            fontWeight: "700",
-            color: "#0a0a0b",
-          }}
-        >
-          d
-        </div>
-        <div
-          style={{
-            fontSize: "36px",
-            fontWeight: "700",
-            color: "#ffffff",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          driftless
-        </div>
-      </div>
-
-      {/* Tagline */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          fontSize: "52px",
-          fontWeight: "700",
-          textAlign: "center",
-          lineHeight: 1.15,
-          maxWidth: "800px",
-          letterSpacing: "-0.025em",
-          gap: "0 14px",
-        }}
-      >
-        <span style={{ color: "#ffffff" }}>Your e2e tests become</span>
-        <span style={{ color: "#f59e0b" }}>training docs.</span>
-      </div>
-
-      {/* Subtitle */}
-      <div
-        style={{
-          fontSize: "52px",
-          fontWeight: "700",
-          color: "#52525b",
-          marginTop: "4px",
-          letterSpacing: "-0.025em",
-        }}
-      >
-        Automatically.
-      </div>
-
-      {/* Framework list */}
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          marginTop: "48px",
+          gap: "12px",
           fontSize: "16px",
-          color: "#71717a",
+          fontWeight: 700,
+          color: "#0A0A0A",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+        }}
+      >
+        <div
+          style={{
+            width: "8px",
+            height: "8px",
+            backgroundColor: "#C4862A",
+            display: "flex",
+          }}
+        />
+        DRIFTLESS
+      </div>
+
+      {/* Center: headline */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          justifyContent: "center",
+          gap: "0",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "72px",
+            fontWeight: 700,
+            color: "#0A0A0A",
+            lineHeight: 1.0,
+            letterSpacing: "-0.03em",
+          }}
+        >
+          YOUR E2E TESTS
+        </div>
+        <div
+          style={{
+            display: "flex",
+            fontSize: "72px",
+            fontWeight: 700,
+            color: "#0A0A0A",
+            lineHeight: 1.0,
+            letterSpacing: "-0.03em",
+            gap: "0",
+          }}
+        >
+          <span>BECOME </span>
+          <span style={{ color: "#C4862A" }}>TRAINING DOCS</span>
+        </div>
+      </div>
+
+      {/* Bottom: framework list */}
+      <div
+        style={{
+          display: "flex",
+          gap: "24px",
+          fontSize: "14px",
+          fontWeight: 700,
+          color: "#71717A",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
         }}
       >
         <span>Playwright</span>
-        <span style={{ color: "#3f3f46" }}>·</span>
+        <span style={{ color: "#C4862A" }}>·</span>
         <span>Cypress</span>
-        <span style={{ color: "#3f3f46" }}>·</span>
+        <span style={{ color: "#C4862A" }}>·</span>
         <span>TestCafe</span>
-        <span style={{ color: "#3f3f46" }}>·</span>
+        <span style={{ color: "#C4862A" }}>·</span>
         <span>Detox</span>
-        <span style={{ color: "#3f3f46" }}>·</span>
+        <span style={{ color: "#C4862A" }}>·</span>
         <span>WebDriverIO</span>
-        <span style={{ color: "#3f3f46" }}>·</span>
+        <span style={{ color: "#C4862A" }}>·</span>
         <span>Nightwatch</span>
       </div>
     </div>,
-    { ...size },
+    {
+      ...size,
+      fonts: [
+        {
+          name: "Familjen Grotesk",
+          data: fontData,
+          style: "normal",
+          weight: 700,
+        },
+      ],
+    },
   );
 }
