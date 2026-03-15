@@ -20,12 +20,12 @@ const SCAN_BOOST = 0.3;
 // Original SVG gaps (6 units / 102 total ≈ 6%) are too wide in ASCII.
 // New layout compresses the 3 layers into tighter vertical space.
 //
-// Layout (normalized 0–1):
-//   Top layer:    y 0.00 – 0.30  (narrowest, darkest)
-//   Gap:          y 0.30 – 0.33
-//   Middle layer: y 0.33 – 0.63
-//   Gap:          y 0.63 – 0.66
-//   Bottom layer: y 0.66 – 1.00  (widest, lightest)
+// Layout (normalized 0–1) — gaps kept to ~1.5% so edge chars don't stack:
+//   Top layer:    y 0.00 – 0.325
+//   Gap:          ~1.5%
+//   Middle layer: y 0.34 – 0.655
+//   Gap:          ~1.5%
+//   Bottom layer: y 0.67 – 1.00
 //
 // X proportions preserved from SVG: each layer tapers inward going up.
 
@@ -45,24 +45,24 @@ interface Layer {
 const LAYERS: Layer[] = [
   // Bottom (lightest, widest)
   {
-    topY: 0.66, bottomY: 1.0,
+    topY: 0.67, bottomY: 1.0,
     topLX: 0.051, topRX: 0.949,
     botLX: 0.0, botRX: 1.0,
-    char: "░", alpha: 0.38,
+    char: "░", alpha: 0.50,
   },
   // Middle
   {
-    topY: 0.33, bottomY: 0.63,
+    topY: 0.34, bottomY: 0.655,
     topLX: 0.113, topRX: 0.887,
     botLX: 0.062, botRX: 0.938,
-    char: "▒", alpha: 0.56,
+    char: "▒", alpha: 0.60,
   },
   // Top (darkest, narrowest)
   {
-    topY: 0.0, bottomY: 0.30,
+    topY: 0.0, bottomY: 0.325,
     topLX: 0.175, topRX: 0.825,
     botLX: 0.124, botRX: 0.876,
-    char: "▓", alpha: 0.74,
+    char: "▓", alpha: 0.76,
   },
 ];
 
@@ -127,16 +127,11 @@ export function AsciiMesa() {
           }
           if (!hit) continue;
 
-          const onTop = isEdge(nx, ny, hit, 0, -dy);
-          const onBot = isEdge(nx, ny, hit, 0, dy);
           const onLeft = isEdge(nx, ny, hit, -dx, 0);
           const onRight = isEdge(nx, ny, hit, dx, 0);
-          const isOutline = onTop || onBot || onLeft || onRight;
 
           let char: string;
-          if (onTop || onBot) {
-            char = "─";
-          } else if (onLeft) {
+          if (onLeft) {
             char = "╱";
           } else if (onRight) {
             char = "╲";
@@ -144,7 +139,7 @@ export function AsciiMesa() {
             char = hit.char;
           }
 
-          let alpha = isOutline ? Math.min(1, hit.alpha + 0.15) : hit.alpha;
+          let alpha = (onLeft || onRight) ? Math.min(1, hit.alpha + 0.15) : hit.alpha;
 
           if (animated) {
             const dist = Math.abs(ny - scanY);

@@ -42,15 +42,25 @@ function AnnotationCard({
 function Hero() {
   return (
     <section
-      className="relative flex items-center justify-center overflow-hidden"
+      className="relative flex flex-col items-center overflow-hidden md:justify-center"
       style={{
         minHeight: "calc(100vh - var(--nav-height))",
         paddingTop: "var(--nav-height)",
       }}
     >
-      {/* Mesa — behind text */}
+      {/* Mesa — above text on mobile, behind text on desktop */}
+      {/* Mobile: in-flow, larger, with breathing room */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+        className="pointer-events-none mt-[var(--space-12)] w-[85vw] max-w-[340px] md:hidden"
+        aria-hidden="true"
+      >
+        <div className="aspect-[1.57/1] w-full opacity-70">
+          <MesaCanvas />
+        </div>
+      </div>
+      {/* Desktop: absolutely positioned behind text */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 hidden items-center justify-center md:flex"
         style={{ top: "10%" }}
         aria-hidden="true"
       >
