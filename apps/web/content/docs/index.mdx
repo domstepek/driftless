@@ -3,6 +3,12 @@ title: Quick Start
 description: Get started with driftless in under 5 minutes.
 ---
 
+<Callout title="Prerequisite" type="warn">
+  driftless requires [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) to be
+  installed and authenticated. The CLI uses Claude Code to read your tests and generate
+  documentation.
+</Callout>
+
 ## Installation
 
 Run the init command in your project root:
@@ -11,45 +17,35 @@ Run the init command in your project root:
 npx @driftless-ai/cli@latest init
 ```
 
-The CLI will walk you through:
+The CLI auto-detects your test framework (Playwright, Cypress, TestCafe, Detox, WebDriverIO, or Nightwatch) and walks you through six configuration prompts:
 
-1. **Selecting your e2e test framework** — Playwright, Cypress, or other
-2. **Choosing a docs output format** — Markdown, fumadocs MDX, or Docusaurus MDX
-3. **Configuring your skills directory** — where training docs are written
+1. **Test file glob pattern** — which test files to analyze (auto-populated from your detected framework)
+2. **Output directory** — where generated docs are written (default: `docs/training`)
+3. **Documentation framework** — Plain Markdown, Fumadocs MDX, or Docusaurus MDX
+4. **Capabilities to enable** — Doc Generator, E2E Writer, or both
+5. **Skills directory** — where skill definition files are stored (default: `.skills`)
+6. **Auto-update preference** — whether the CLI should self-update on launch
 
-A `.driftless.json` config file is created in your project root.
+A `.driftless.json` config file is created in your project root. See the [init walkthrough](/docs/init-walkthrough) for a detailed breakdown of each prompt and what happens after you answer them.
 
 ## How It Works
 
-driftless uses AI to read your end-to-end tests and generate training documentation that stays in sync with your actual application behavior.
+When you run `driftless init` with the **Doc Generator** capability enabled, driftless reads your end-to-end test files and generates user-facing training documentation. It also installs skill files that teach Claude Code how to write and maintain docs in your project's conventions.
 
-When your tests change, driftless detects which docs are stale and regenerates them — either locally via the CLI or automatically via GitHub Actions on every PR.
-
-### Local Usage
-
-Generate docs from your e2e tests:
-
-```bash
-npx @driftless-ai/cli@latest generate
-```
+When your tests change in a pull request, the installed GitHub Actions workflow detects which docs are stale and updates them automatically.
 
 ### GitHub Actions
 
-Add the driftless workflow to automatically update docs when tests change:
+`driftless init` scaffolds up to two GitHub Actions workflows depending on your selected capabilities:
 
-```yaml
-# .github/workflows/driftless-doc-update.yml
-name: driftless doc update
-on:
-  pull_request:
-    paths:
-      - "tests/**"
-      - "e2e/**"
-```
+- **Driftless Doc Update** — detects stale documentation when tests change in a PR and updates it
+- **Driftless Test Generation** — detects new user-facing flows in a PR and generates missing e2e tests
 
-The workflow detects stale docs and opens a PR with updated training documentation.
+Both workflows use [claude-code-action](https://github.com/anthropics/claude-code-action) and require an `ANTHROPIC_API_KEY` secret in your repository. See the [GitHub Actions guide](/docs/github-actions) for setup details and operational edge handling.
 
 ## Next Steps
 
-- Browse the [GitHub repository](https://github.com/driftless-ai/driftless) for source code and examples
-- Read about [configuration options](/docs/configuration) to customize driftless for your project
+- [Init walkthrough](/docs/init-walkthrough) — detailed breakdown of every init prompt and the post-prompt flow
+- [Configuration reference](/docs/configuration) — every `.driftless.json` field with its type, default, and effect
+- [GitHub Actions setup](/docs/github-actions) — workflow configuration, secrets, and operational details
+- [Troubleshooting](/docs/troubleshooting) — common errors and how to resolve them

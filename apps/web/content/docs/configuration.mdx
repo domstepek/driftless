@@ -1,0 +1,113 @@
+---
+title: Configuration Reference
+description: Every .driftless.json field with its type, default, and effect.
+---
+
+The `.driftless.json` file at your project root controls how driftless generates documentation, installs skills, and scaffolds workflows. This file is created by [`driftless init`](/docs/init-walkthrough) and can be edited manually.
+
+## Config fields
+
+| Field            | Type             | Required | Default           | Description                                                                                                                                            |
+| ---------------- | ---------------- | -------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `$schema`        | `string`         | No       | —                 | Optional JSON schema URL for editor autocompletion and validation.                                                                                     |
+| `testPaths`      | `string[]`       | **Yes**  | —                 | Glob patterns for test files to analyze. Set during init from the test glob prompt.                                                                    |
+| `outputDir`      | `string`         | **Yes**  | `"docs/training"` | Directory where generated documentation is written.                                                                                                    |
+| `docFramework`   | `DocFramework`   | **Yes**  | —                 | Target documentation framework. One of `"plain-md"`, `"fumadocs"`, or `"docusaurus"`.                                                                  |
+| `capabilities`   | `Capability[]`   | **Yes**  | —                 | Feature capabilities enabled for this project. Array of `"doc-generator"` and/or `"e2e-writer"`.                                                       |
+| `skillsDir`      | `string`         | **Yes**  | `".skills"`       | Directory containing skill definition files (`SKILL.md`).                                                                                              |
+| `testFramework`  | `TestFramework`  | No       | Auto-detected     | Detected or user-specified test framework. One of `"playwright"`, `"cypress"`, `"testcafe"`, `"detox"`, `"webdriverio"`, `"nightwatch"`, or `"other"`. |
+| `agentHarness`   | `"claude-code"`  | **Yes**  | `"claude-code"`   | Agent harness used to run driftless. Currently only `"claude-code"` is supported.                                                                      |
+| `docGrouping`    | `DocGrouping`    | No       | `"per-file"`      | How test files map to generated docs. Currently only `"per-file"` is supported (one doc per test file).                                                |
+| `autoUpdate`     | `boolean`        | No       | `true`            | Whether the CLI should auto-update on launch when a newer version is available.                                                                        |
+| `packageManager` | `PackageManager` | No       | Auto-detected     | Package manager for global install commands. One of `"npm"`, `"pnpm"`, `"yarn"`, or `"bun"`. Auto-detected from your environment if omitted.           |
+
+## Example config
+
+```json
+{
+  "testPaths": ["tests/**/*.spec.ts"],
+  "outputDir": "docs/training",
+  "docFramework": "fumadocs",
+  "capabilities": ["doc-generator", "e2e-writer"],
+  "skillsDir": ".skills",
+  "testFramework": "playwright",
+  "agentHarness": "claude-code",
+  "autoUpdate": true
+}
+```
+
+## Framework detection
+
+When you run `driftless init`, the CLI scans your project root for known config files to auto-detect your test framework. Detection stops at the first match in priority order:
+
+| Priority | Framework   | Config files checked                                                                 |
+| -------- | ----------- | ------------------------------------------------------------------------------------ |
+| 1        | Playwright  | `playwright.config.ts`, `playwright.config.js`, `playwright.config.mjs`              |
+| 2        | Cypress     | `cypress.config.ts`, `cypress.config.js`, `cypress.config.mjs`, `cypress.config.cjs` |
+| 3        | TestCafe    | `.testcaferc.json`, `.testcaferc.js`                                                 |
+| 4        | Detox       | `detox.config.js`, `detox.config.ts`, `.detoxrc.js`, `.detoxrc.json`                 |
+| 5        | WebDriverIO | `wdio.conf.ts`, `wdio.conf.js`                                                       |
+| 6        | Nightwatch  | `nightwatch.conf.ts`, `nightwatch.conf.js`, `nightwatch.json`                        |
+
+If no config file is found, `testFramework` is omitted from the config and the fallback test glob `tests/**/*.test.{ts,js}` is used. You can set `testFramework` manually in `.driftless.json` after init.
+
+## Documentation frameworks
+
+The `docFramework` field determines the output format of generated documentation.
+
+### Plain Markdown (`plain-md`)
+
+- **File extension:** `.md`
+- **Frontmatter:** YAML with `title` and `description`
+- **Callouts:** Blockquotes prefixed with `**Tip:**`, `**Warning:**`, or `**Note:**`
+- **Best for:** Projects without a docs framework, READMEs, wikis
+
+### Fumadocs (`fumadocs`)
+
+- **File extension:** `.mdx`
+- **Frontmatter:** YAML with `title` and `description` (title renders as page heading — no separate `# Title`)
+- **Callouts:** `<Callout>` components with `type` prop (`info`, `warn`, `error`, `success`, `idea`)
+- **Best for:** Next.js projects using Fumadocs for documentation
+
+### Docusaurus (`docusaurus`)
+
+- **File extension:** `.mdx`
+- **Frontmatter:** YAML with `id`, `title`, `description`, and `sidebar_position`
+- **Callouts:** `:::` admonition syntax (`note`, `tip`, `info`, `warning`, `danger`)
+- **Best for:** Projects using Docusaurus for documentation
+
+## Capabilities
+
+Each capability installs a skill file and a GitHub Actions workflow.
+
+### Doc Generator (`doc-generator`)
+
+**Installs:**
+
+- `{skillsDir}/doc-generator/SKILL.md` — skill file that teaches Claude Code how to read test files and produce user-facing training documentation in your chosen doc framework format
+- `.github/workflows/driftless-doc-update.yml` — workflow that triggers on PRs, detects stale docs, and updates them
+
+**What it does:** Reads your e2e test files and generates step-by-step training documents derived from the test actions and assertions. The skill file is parameterized with your actual config values (test paths, output directory, formatting conventions).
+
+### E2E Writer (`e2e-writer`)
+
+**Installs:**
+
+- `{skillsDir}/e2e-writer/SKILL.md` — skill file that teaches Claude Code how to write e2e tests matching your project conventions
+- `.github/workflows/driftless-test-gen.yml` — workflow that triggers on PRs, detects new user-facing flows, and generates missing e2e tests
+
+**What it does:** Identifies new user-facing workflows in pull requests and generates e2e test files for them. The skill file includes your framework, test paths, and naming conventions.
+
+## Optional fields
+
+### `docGrouping`
+
+Controls how test files map to generated docs. Currently only `"per-file"` is supported, which produces one documentation file per test file.
+
+### `autoUpdate`
+
+When `true` (the default), the CLI checks for a newer published version on launch and updates itself automatically. Set to `false` to manage updates manually.
+
+### `packageManager`
+
+The package manager used for global install commands during auto-update. Auto-detected from your environment if omitted. Supported values: `"npm"`, `"pnpm"`, `"yarn"`, `"bun"`.

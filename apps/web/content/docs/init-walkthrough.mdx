@@ -1,0 +1,143 @@
+---
+title: Init Walkthrough
+description: Detailed breakdown of every driftless init prompt and the post-prompt setup flow.
+---
+
+This page documents the full `driftless init` flow — each interactive prompt with its exact message, placeholder, and default, followed by the automated setup steps that run after you finish answering.
+
+<Callout title="Before you begin" type="warn">
+  driftless requires [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and
+  authenticated. The doc generation and workflow steps use Claude Code under the hood.
+</Callout>
+
+## Running init
+
+```bash
+npx @driftless-ai/cli@latest init
+```
+
+The CLI starts by auto-detecting your test framework. If a known config file is found (e.g., `playwright.config.ts`, `cypress.config.ts`), the detected framework is displayed and used to pre-populate the test glob pattern.
+
+## Interactive prompts
+
+### 1. Test file glob pattern
+
+|                 |                                                                        |
+| --------------- | ---------------------------------------------------------------------- |
+| **Message**     | `Test file glob pattern`                                               |
+| **Placeholder** | Framework-specific default (e.g., `tests/**/*.spec.ts` for Playwright) |
+| **Default**     | Same as placeholder — press Enter to accept                            |
+
+If no framework is detected, the fallback default is `tests/**/*.test.{ts,js}`.
+
+<Callout title="Framework-specific defaults" type="info">
+Each detected framework has its own default glob: Playwright uses `tests/**/*.spec.ts`, Cypress uses `cypress/e2e/**/*.cy.{ts,js}`, TestCafe uses `tests/**/*.test.{ts,js}`, Detox uses `e2e/**/*.test.{ts,js}`, WebDriverIO uses `test/**/*.test.{ts,js}`, and Nightwatch uses `tests/**/*.{ts,js}`.
+</Callout>
+
+### 2. Output directory
+
+|                 |                                       |
+| --------------- | ------------------------------------- |
+| **Message**     | `Output directory for generated docs` |
+| **Placeholder** | `docs/training`                       |
+| **Default**     | `docs/training`                       |
+
+This is where generated documentation files are written. The directory is created automatically during init.
+
+### 3. Documentation framework
+
+|             |                                      |
+| ----------- | ------------------------------------ |
+| **Message** | `Documentation framework`            |
+| **Options** | Plain Markdown, Fumadocs, Docusaurus |
+
+Choose the output format for generated docs. This determines file extensions and formatting conventions:
+
+- **Plain Markdown** (`plain-md`) — produces `.md` files with YAML frontmatter and blockquote callouts
+- **Fumadocs** (`fumadocs`) — produces `.mdx` files with `<Callout>` components
+- **Docusaurus** (`docusaurus`) — produces `.mdx` files with `:::` admonition syntax
+
+See the [configuration reference](/docs/configuration) for full details on each format.
+
+### 4. Capabilities to enable
+
+|             |                           |
+| ----------- | ------------------------- |
+| **Message** | `Capabilities to enable`  |
+| **Options** | Doc Generator, E2E Writer |
+| **Default** | Both selected             |
+
+Capabilities determine what driftless installs and automates:
+
+- **Doc Generator** — installs the `doc-generator` skill and the `driftless-doc-update.yml` GitHub Actions workflow
+- **E2E Writer** — installs the `e2e-writer` skill and the `driftless-test-gen.yml` GitHub Actions workflow
+
+At least one capability must be selected.
+
+### 5. Skills directory
+
+|                 |                    |
+| --------------- | ------------------ |
+| **Message**     | `Skills directory` |
+| **Placeholder** | `.skills`          |
+| **Default**     | `.skills`          |
+
+The directory where skill definition files (`SKILL.md`) are installed. Each capability creates a subdirectory (e.g., `.skills/doc-generator/SKILL.md`).
+
+### 6. Auto-update preference
+
+|             |                                                                |
+| ----------- | -------------------------------------------------------------- |
+| **Message** | `Auto-update driftless CLI when a newer version is available?` |
+| **Default** | Yes                                                            |
+
+When enabled, the CLI checks for newer versions on launch and updates automatically.
+
+## Post-prompt flow
+
+After you answer all six prompts, `driftless init` runs the following steps automatically. If you pass `--dry-run`, it previews what would happen without writing any files.
+
+### Framework auto-detection
+
+Before prompts begin, init scans your project root for known test framework config files (e.g., `playwright.config.ts`, `cypress.config.ts`). The first match in priority order is used. See the [framework detection table](/docs/configuration#framework-detection) in the configuration reference for the full priority list.
+
+### Config file write
+
+The CLI writes `.driftless.json` to your project root with all your answers. If a config file already exists, you are prompted to confirm overwriting.
+
+All filesystem writes during init are wrapped in a transaction — if any step fails, all changes are rolled back automatically.
+
+### Doc generation
+
+If the **Doc Generator** capability is selected, init immediately runs doc generation. It resolves your test glob patterns, reads each matched test file, and uses Claude Code to produce a training document for each one. A progress spinner shows which file is being processed and the running count.
+
+<Callout title="Generation errors" type="info">
+  If some test files fail to generate, init continues with the rest and reports the failures as
+  warnings. Per-file error details are logged to the debug log.
+</Callout>
+
+### Skill installation
+
+For each selected capability, init writes a `SKILL.md` file into the skills directory:
+
+- `{skillsDir}/doc-generator/SKILL.md` — teaches Claude Code how to write and format training docs for your project
+- `{skillsDir}/e2e-writer/SKILL.md` — teaches Claude Code how to write e2e tests following your project conventions
+
+Skill files are parameterized with your actual config values (test paths, output directory, doc framework).
+
+### Workflow installation
+
+For each selected capability, init scaffolds a GitHub Actions workflow:
+
+- `.github/workflows/driftless-doc-update.yml` — triggers on pull requests, detects stale docs, and updates them
+- `.github/workflows/driftless-test-gen.yml` — triggers on pull requests, detects new flows, and generates missing tests
+
+See the [GitHub Actions guide](/docs/github-actions) for details on what each workflow does and the operational edges it handles.
+
+### Debug log
+
+Every init run writes a structured debug log to `.driftless/debug.log`. The log captures each phase (detection, config, generation results, skill installation, workflow installation, errors) with timestamps. This log is preserved even when init fails — check it first when troubleshooting.
+
+### Completion
+
+On success, init prints a summary showing your configuration, the number of docs generated, skills installed, and workflows scaffolded. The transaction is committed and all files are finalized.

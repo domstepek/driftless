@@ -1,0 +1,138 @@
+---
+title: Troubleshooting
+description: Common errors and how to fix them.
+---
+
+## Config file not found
+
+```
+Error: Config file not found: /path/to/project/.driftless.json
+```
+
+The CLI can't find `.driftless.json` in the current directory. This means either you haven't run init yet, or you're running the command from the wrong directory.
+
+**Fix:** Run `driftless init` in your project root, or `cd` to the directory that contains `.driftless.json`.
+
+## Invalid JSON in config file
+
+```
+Error: Invalid JSON in config file: /path/to/project/.driftless.json
+```
+
+The `.driftless.json` file exists but contains malformed JSON — usually from a bad manual edit.
+
+**Fix:** Delete `.driftless.json` and re-run `driftless init`. The init command will walk you through the prompts again. If you need to preserve specific values, check the [Configuration Reference](/docs/configuration) for valid field formats before editing manually.
+
+## Claude Code CLI not found
+
+```
+spawn error: spawn claude ENOENT
+```
+
+driftless spawns the `claude` CLI as a child process to generate documentation. This error means the `claude` binary isn't in your `PATH`.
+
+**Fix:**
+
+1. Install Claude Code CLI from [docs.anthropic.com](https://docs.anthropic.com/en/docs/claude-code)
+2. Verify it's accessible: run `claude --version` in your terminal
+3. If installed but not found, ensure the install location is in your shell's `PATH`
+
+## Agent timeout
+
+```
+Error: timed out after 120000ms
+```
+
+The Claude Code agent took longer than the default 120-second timeout. This can happen with very large test files, slow API responses, or complex generation tasks.
+
+**Fix:** The timeout is currently set to 120 seconds (2 minutes). If you're consistently hitting timeouts:
+
+- Check your network connection to Anthropic's API
+- Try running on smaller test files first to verify the setup works
+- Check `.driftless/debug.log` for which phase was in progress when the timeout hit
+
+## Debug Log
+
+driftless writes a structured debug log to `.driftless/debug.log` after each operation. The file is a JSON array of entries, each with:
+
+```json
+[
+  {
+    "timestamp": "2025-01-15T10:30:00.000Z",
+    "phase": "detect",
+    "data": { "framework": "playwright", "testFiles": 12 }
+  },
+  {
+    "timestamp": "2025-01-15T10:30:01.000Z",
+    "phase": "generate",
+    "data": { "file": "tests/login.spec.ts" }
+  }
+]
+```
+
+Each entry has a `phase` field indicating the operation stage: `detect`, `config`, `generate`, `error`, or `rollback`.
+
+**Filtering entries with jq:**
+
+```bash
+# Show only errors
+cat .driftless/debug.log | jq '.[] | select(.phase == "error")'
+
+# Show the generate phase
+cat .driftless/debug.log | jq '.[] | select(.phase == "generate")'
+```
+
+When filing a bug report, include the contents of `.driftless/debug.log` — it gives maintainers the full picture of what happened.
+
+## Rollback on failed init
+
+If `driftless init` fails partway through (network error, permission issue, cancelled), it automatically cleans up any files it created. The `FileTransaction` system tracks every file write and directory creation during init, and rolls them back in reverse order on failure.
+
+- Files that didn't exist before init are deleted
+- Directories that didn't exist before init are removed (only if empty after cleanup)
+- Files that already existed before init are left untouched
+
+You don't need to manually clean up after a failed init — just fix the underlying issue and run `driftless init` again.
+
+## Auto-update issues
+
+driftless checks for newer versions on the npm registry before each run. The update behavior depends on how you installed it:
+
+### Permission errors on global install
+
+```
+Auto-update failed — run `npm install -g @driftless-ai/cli@latest` manually.
+```
+
+The auto-updater tried to run the global install command but lacked permission. This typically happens with globally installed npm packages that require `sudo`.
+
+**Fix:** Run the suggested command manually with appropriate permissions, or use a Node version manager (nvm, fnm) that installs to a user-writable directory.
+
+### npx notification
+
+When running via `npx`, driftless can't auto-update itself. Instead, it prints a notification to stderr:
+
+```
+A newer version of @driftless-ai/cli is available: 1.1.0 (current: 1.0.0)
+Run: npm install -g @driftless-ai/cli@latest
+```
+
+**Fix:** Install the latest version globally if you want automatic updates, or continue using `npx @driftless-ai/cli@latest` to always get the newest version.
+
+### Major version warnings
+
+When an update crosses a major version boundary (e.g., v1.x → v2.x), the updater prints a warning before installing:
+
+```
+⚠ Updating from v1.0.0 to v2.0.0 — this is a major version change.
+```
+
+Major versions may include breaking changes to config format, CLI flags, or workflow structure. Check the release notes before continuing.
+
+### CI environments
+
+Auto-update is skipped entirely in CI environments (when the `CI` environment variable is set). This prevents unexpected version changes during automated builds.
+
+## Still stuck?
+
+If your issue isn't covered here, check the debug log at `.driftless/debug.log` and [open an issue](https://github.com/driftless-ai/driftless/issues) with the log contents and the command you ran.

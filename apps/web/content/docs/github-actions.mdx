@@ -1,0 +1,144 @@
+---
+title: GitHub Actions
+description: How driftless uses GitHub Actions to keep docs and tests in sync with your code.
+---
+
+driftless scaffolds two GitHub Actions workflows during [`driftless init`](/docs/init-walkthrough). You don't write these by hand — the CLI generates them based on your [selected capabilities](/docs/configuration).
+
+<Callout type="warn" title="Required Secret">
+  Both workflows need an `ANTHROPIC_API_KEY` secret in your repository. Go to **Settings → Secrets
+  and variables → Actions → New repository secret** and add your Anthropic API key as
+  `ANTHROPIC_API_KEY`. Without it, the workflows skip gracefully but won't do anything.
+</Callout>
+
+## Workflows
+
+### Doc Update (`driftless-doc-update.yml`)
+
+Triggers on every pull request. Uses [claude-code-action](https://github.com/anthropics/claude-code-action) to:
+
+1. Read the PR diff
+2. Identify which user-facing features changed
+3. Find documentation in your output directory that covers those features
+4. Update any stale docs to match the new behavior
+5. Post a PR comment summarizing what changed
+
+This workflow is installed when you select the **doc-generator** capability.
+
+### Test Generation (`driftless-test-gen.yml`)
+
+Also triggers on every pull request. Uses claude-code-action to:
+
+1. Read the PR diff
+2. Identify genuinely new user-facing flows (not modifications to existing ones)
+3. Generate missing e2e tests using your installed e2e-writer skill
+4. Post a PR comment summarizing what was generated and what was skipped
+
+This workflow is installed when you select the **e2e-writer** capability.
+
+## Operational Edge Handlers
+
+Both workflows share the same set of guards that handle CI edge cases. These are generated automatically — you don't need to configure them.
+
+### Bot Loop Prevention
+
+```yaml
+if: >-
+  !endsWith(github.actor, '[bot]')
+```
+
+GitHub Actions exposes `github.actor` for every run. Bot accounts (like the one claude-code-action uses to push commits) have names ending in `[bot]`. This condition prevents infinite loops where the workflow triggers itself by pushing a commit that re-triggers the workflow.
+
+### Fork PR Detection
+
+```yaml
+- name: Skip fork PRs
+  if: github.event.pull_request.head.repo.fork == true
+  run: |
+    echo "::notice::Skipping driftless: fork PRs cannot access secrets."
+    exit 0
+```
+
+Fork PRs can't access your repository secrets. Instead of failing with a confusing auth error, the workflow detects forks and exits cleanly with a notice annotation.
+
+### API Key Check
+
+```yaml
+- name: Check for API key
+  if: github.event.pull_request.head.repo.fork != true
+  env:
+    HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+  run: |
+    if [ "$HAS_KEY" != "true" ]; then
+      echo "::warning::ANTHROPIC_API_KEY secret is not set. Skipping driftless doc update."
+      exit 0
+    fi
+```
+
+If `ANTHROPIC_API_KEY` is missing or empty, the workflow exits with a warning annotation instead of crashing. This lets you merge the workflow file before adding the secret.
+
+### PR Branch Checkout
+
+```yaml
+- name: Checkout PR branch
+  uses: actions/checkout@v4
+  with:
+    ref: ${{ github.event.pull_request.head.ref }}
+    fetch-depth: 0
+```
+
+Two things happen here:
+
+- **`ref: head.ref`** — checks out the PR branch directly, not the merge commit. This is required so claude-code-action can push follow-up commits (doc updates or new test files) back to the PR branch.
+- **`fetch-depth: 0`** — fetches full git history. The agent needs this to run `git diff HEAD~1` and understand what changed in the PR.
+
+## Generated Workflow Structure
+
+Here's the overall shape of a generated workflow (doc-update shown, test-gen is identical in structure):
+
+```yaml
+name: Driftless Doc Update
+on:
+  pull_request:
+
+jobs:
+  update-docs:
+    if: >-
+      !endsWith(github.actor, '[bot]')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Skip fork PRs
+        # ... fork detection guard
+      - name: Check for API key
+        # ... API key guard
+      - name: Checkout PR branch
+        # ... full-history checkout
+      - name: Update stale documentation
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            # ... staleness detection prompt generated from your config
+          claude_args: "--allowedTools bash,read,write,edit"
+```
+
+The `permissions` block grants `contents: write` (to push commits), `pull-requests: write` (to post PR comments), and `id-token: write` (for OIDC auth).
+
+## What You Control
+
+The prompts embedded in each workflow are generated from your [`.driftless.json` config](/docs/configuration):
+
+- **`outputDir`** — tells the agent where to find/write documentation
+- **`testPaths`** — tells the agent which test file patterns to scan
+- **`skillsDir`** — tells the agent where to find skill definitions for formatting conventions
+- **`capabilities`** — determines which workflows get installed (`doc-generator`, `e2e-writer`, or both)
+
+If you change these config values, re-run `driftless init` to regenerate the workflows.
+
+## Troubleshooting CI
+
+If a workflow isn't running or behaving unexpectedly, see the [Troubleshooting](/docs/troubleshooting) page for common issues including missing API keys, permission errors, and how to read debug logs.

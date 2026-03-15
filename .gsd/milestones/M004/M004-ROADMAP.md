@@ -50,7 +50,7 @@ This milestone is complete only when all are true:
 
 - [x] **S01: Landing page + docs site deployed on Vercel** `risk:high` `depends:[]`
   > After this: a polished landing page is live on a Vercel URL with the install command, before/after example, and links to docs. The `/docs` section has a working Quick Start page with fumadocs navigation, search, and dark mode. Existing monorepo tests still pass.
-- [ ] **S02: Documentation content** `risk:low` `depends:[S01]`
+- [x] **S02: Documentation content** `risk:low` `depends:[S01]`
   > After this: all five required docs sections are complete — Quick Start (expanded), full init walkthrough, GitHub Action setup, configuration reference, and troubleshooting — with accurate content ported from and expanding on the README.
 - [ ] **S03: X/Twitter launch playbook** `risk:low` `depends:[S01]`
   > After this: `~/Desktop/driftless/m004-launch-playbook.md` contains a researched, day-by-day launch strategy with pre-written tweet copy referencing the actual landing page URL, npm install command, and real features — informed by google_search research on SWE community engagement.

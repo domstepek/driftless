@@ -270,13 +270,13 @@ Guidelines:
 ### R022 — Fumadocs documentation site
 
 - Class: launchability
-- Status: active
+- Status: validated
 - Description: A documentation site built with fumadocs covering installation, configuration, usage guides, and API reference for driftless
 - Why it matters: Users need to know how to use the tool — and dogfooding fumadocs validates our own adapter
 - Source: user
 - Primary owning slice: M004/S02
 - Supporting slices: none
-- Validation: unmapped
+- Validation: M004/S02 — five docs pages (Quick Start, init walkthrough, GitHub Actions, configuration, troubleshooting) compile via `next build`, render with fumadocs navigation/search, sidebar ordered via `meta.json`. Content derived from source code: prompt messages match `init-prompts.ts`, config fields match `types.ts`, workflow structure matches `workflows.ts`, error messages match `config.ts`/`agent.ts`/`logger.ts`. 268 tests pass with no regressions.
 - Notes: Dogfooding opportunity — driftless docs built with a framework driftless supports
 
 ### R023 — X/Twitter product launch playbook
@@ -476,7 +476,7 @@ Guidelines:
 | R019 | launchability      | validated    | M003/S03      | none               | M003/S03 |
 | R020 | launchability      | validated    | M003/S03      | none               | M003/S03 |
 | R021 | launchability      | validated    | M004/S01      | none               | M004/S01 |
-| R022 | launchability      | active       | M004/S02      | none               | unmapped |
+| R022 | launchability      | validated    | M004/S02      | none               | M004/S02 |
 | R023 | launchability      | active       | M004/S03      | none               | unmapped |
 | R024 | quality-attribute  | active       | M004/S03      | none               | unmapped |
 | R025 | constraint         | active       | M001          | M003/S03           | unmapped |
@@ -494,7 +494,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 4
-- Mapped to slices: 4
-- Validated: 25
+- Active requirements: 3
+- Mapped to slices: 3
+- Validated: 26
 - Unmapped active requirements: 0
